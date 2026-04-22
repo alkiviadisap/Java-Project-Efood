@@ -6,7 +6,7 @@ package efoodapp;
 
 /**
  *
- * @author alkiv
+ * @author alkiv,giannis
  */
 public class EfoodApp {
 
