@@ -79,7 +79,7 @@ public class CartCheckoutFrame extends javax.swing.JFrame {
 
         jLabel5.setText("With Discounts:");
 
-        jLabel6.setText("Pay");
+        jLabel6.setText("Payment method:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
