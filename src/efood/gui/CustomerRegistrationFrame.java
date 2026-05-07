@@ -42,7 +42,7 @@ public class CustomerRegistrationFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Φόρμα Εγγραφής Πελάτη");
 
-        jLabel1.setText("Emai:");
+        jLabel1.setText("Email:");
 
         jLabel2.setText("Password:");
 
@@ -50,14 +50,7 @@ public class CustomerRegistrationFrame extends javax.swing.JFrame {
 
         jLabel4.setText("Address:");
 
-        jTextField1.setText("jTextField1");
-
-        jTextField2.setText("jTextField2");
-
-        jTextField3.setText("jTextField3");
         jTextField3.addActionListener(this::jTextField3ActionPerformed);
-
-        jTextField4.setText("jTextField4");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

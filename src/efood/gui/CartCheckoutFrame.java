@@ -46,7 +46,7 @@ public class CartCheckoutFrame extends javax.swing.JFrame {
         setTitle("Καλάθι & Checkout");
         setAutoRequestFocus(false);
 
-        jLabel1.setText("Your Order");
+        jLabel1.setText("Your Order:");
 
         jList1.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -55,9 +55,8 @@ public class CartCheckoutFrame extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jList1);
 
-        jLabel2.setText("Promo Code");
+        jLabel2.setText("Promo Code:");
 
-        jTextField1.setText("jTextField1");
         jTextField1.addActionListener(this::jTextField1ActionPerformed);
 
         jButton1.setBackground(new java.awt.Color(102, 204, 255));
