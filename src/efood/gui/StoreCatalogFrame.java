@@ -1,188 +1,120 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
-package efood.guiN;
+package efood.gui;
 
-/**
- *
- * @author alkiv
- */
-public class StoreCatalogFrame extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(StoreCatalogFrame.class.getName());
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import java.awt.*;
 
-    /**
-     * Creates new form StoreCatalogFrame
-     */
+public class StoreCatalogFrame extends JFrame {
+
     public StoreCatalogFrame() {
-        initComponents();
+        // Ρυθμίσεις Παραθύρου - Laptop Layout
+        setTitle("Κατάλογος Καταστήματος");
+        setSize(1000, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(false);
+        setLayout(new BorderLayout());
+
+        // Κύριο Panel με padding
+        JPanel mainPanel = new JPanel(new BorderLayout(20, 0));
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(new EmptyBorder(20, 50, 20, 50));
+
+        // --- Πάνω Μέρος: Τίτλος Καταστήματος ---
+        JLabel storeName = new JLabel("NAME OF STORE", SwingConstants.CENTER);
+        storeName.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 28));
+        storeName.setBorder(new EmptyBorder(10, 0, 20, 0));
+        add(storeName, BorderLayout.NORTH);
+
+        // --- Αριστερό Panel: Λίστα Προϊόντων (Menu) ---
+        JPanel menuPanel = new JPanel(new BorderLayout());
+        menuPanel.setOpaque(false);
+        
+        JPanel menuHeader = new JPanel(new BorderLayout());
+        menuHeader.setOpaque(false);
+        JButton backBtn = new JButton("Go Back");
+        backBtn.setBackground(new Color(230, 80, 80));
+        backBtn.setForeground(Color.WHITE);
+        
+        JButton addBtn = new JButton("Add to Basket");
+        addBtn.setBackground(new Color(255, 220, 220));
+        
+        menuHeader.add(backBtn, BorderLayout.WEST);
+        menuHeader.add(addBtn, BorderLayout.EAST);
+        menuHeader.setBorder(new EmptyBorder(0, 0, 10, 0));
+
+        JTextArea productList = new JTextArea("Item 1\nItem 2\nItem 3\nItem 4\nItem 5");
+        productList.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        productList.setBorder(new LineBorder(Color.BLACK, 2));
+        
+        menuPanel.add(menuHeader, BorderLayout.NORTH);
+        menuPanel.add(new JScrollPane(productList), BorderLayout.CENTER);
+
+        // --- Δεξί Panel: My Cart ---
+        JPanel cartPanel = new JPanel();
+        cartPanel.setLayout(new BoxLayout(cartPanel, BoxLayout.Y_AXIS));
+        cartPanel.setPreferredSize(new Dimension(350, 0));
+        cartPanel.setOpaque(false);
+
+        JLabel cartTitle = new JLabel("Το Καλάθι μου:");
+        cartTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        cartTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JPanel cartItemsBox = new JPanel();
+        cartItemsBox.setBackground(Color.WHITE);
+        cartItemsBox.setBorder(new LineBorder(Color.BLACK, 2));
+        cartItemsBox.setPreferredSize(new Dimension(300, 300));
+        cartItemsBox.setMaximumSize(new Dimension(300, 300));
+
+        // --- Loyalty Points Section (Προστέθηκε ο αριθμός των πόντων) ---
+        JPanel loyaltyPanel = new JPanel();
+        loyaltyPanel.setLayout(new BoxLayout(loyaltyPanel, BoxLayout.Y_AXIS));
+        loyaltyPanel.setOpaque(false);
+        loyaltyPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel currentPointsLabel = new JLabel("Your Points: 150"); // Εδώ φαίνονται οι πόντοι
+        currentPointsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        currentPointsLabel.setForeground(new Color(120, 40, 180)); // Μοβ χρώμα για έμφαση
+        currentPointsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JCheckBox loyaltyCheck = new JCheckBox("Redeem loyalty points?");
+        loyaltyCheck.setFont(new Font("Arial", Font.PLAIN, 14));
+        loyaltyCheck.setOpaque(false);
+        loyaltyCheck.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        loyaltyPanel.add(currentPointsLabel);
+        loyaltyPanel.add(loyaltyCheck);
+        
+        JLabel totalLabel = new JLabel("Total Amount: 16.50€");
+        totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        totalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        totalLabel.setBorder(new EmptyBorder(15, 0, 0, 0));
+
+        cartPanel.add(cartTitle);
+        cartPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        cartPanel.add(cartItemsBox);
+        cartPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        cartPanel.add(loyaltyPanel);
+        cartPanel.add(totalLabel);
+
+        // --- Layout Integration ---
+        mainPanel.add(menuPanel, BorderLayout.CENTER);
+        mainPanel.add(cartPanel, BorderLayout.EAST);
+
+        // --- Bottom Button: NEXT ---
+        JButton nextBtn = new JButton("NEXT TO CHECKOUT");
+        nextBtn.setBackground(new Color(150, 255, 150)); // Πράσινο
+        nextBtn.setFont(new Font("Arial", Font.BOLD, 20));
+        nextBtn.setPreferredSize(new Dimension(0, 70));
+        
+        add(mainPanel, BorderLayout.CENTER);
+        add(nextBtn, BorderLayout.SOUTH);
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        jLabel1 = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
-        jButton1 = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        jButton3 = new javax.swing.JButton();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Store Menu");
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("NAME OF STORE");
-
-        jPanel1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 4, true));
-
-        jButton2.setBackground(new java.awt.Color(255, 204, 204));
-        jButton2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jButton2.setText("Add to Basket");
-
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane1.setViewportView(jList1);
-
-        jButton1.setBackground(new java.awt.Color(255, 0, 51));
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButton1.setText("Go Back");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
-                        .addComponent(jButton2))
-                    .addComponent(jScrollPane1))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jPanel2.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true));
-        jPanel2.setPreferredSize(new java.awt.Dimension(400, 700));
-
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("My Cart:");
-
-        jButton3.setBackground(new java.awt.Color(51, 255, 102));
-        jButton3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jButton3.setText("NEXT");
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton3))
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
-                .addComponent(jButton3)
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new StoreCatalogFrame().setVisible(true));
+    public static void main(String[] args) {
+        try { UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); } 
+        catch (Exception e) {}
+        SwingUtilities.invokeLater(() -> new StoreCatalogFrame().setVisible(true));
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JList<String> jList1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
-    // End of variables declaration//GEN-END:variables
 }
