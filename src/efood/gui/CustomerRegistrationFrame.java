@@ -1,7 +1,4 @@
-package efood.gui;
-
-import efood.models.Customer;
-import efood.utils.DatabaseManager;
+package efood.gui2; // ΣΙΓΟΥΡΕΨΟΥ ΟΤΙ ΤΟ PACKAGE EINAI TO ΣΩΣΤΟ ΣΤΟ NETBEANS
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,9 +9,8 @@ import java.awt.event.ActionListener;
 
 public class CustomerRegistrationFrame extends JFrame {
 
-    // 1. Dilonoume ta pedia edw panw gia na ta "vlepei" to koumpi tis eggrafis
     private JTextField emailField;
-    private JPasswordField passField; // Xrisimopoioume JPasswordField gia ton kwdiko
+    private JPasswordField passField; 
     private JTextField phoneField;
     private JTextField addressField;
 
@@ -37,13 +33,11 @@ public class CustomerRegistrationFrame extends JFrame {
         mainPanel.add(titleLabel);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        // 2. Arxikopoioume ta pedia pou dilwsame panw
         emailField = new JTextField();
         passField = new JPasswordField();
         phoneField = new JTextField();
         addressField = new JTextField();
 
-        // 3. Ta vazoume stin othoni xrisimopoiwntas tin voithitiki methodo
         mainPanel.add(createLargeFieldPanel("Email:", emailField));
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         
@@ -57,7 +51,6 @@ public class CustomerRegistrationFrame extends JFrame {
 
         mainPanel.add(Box.createVerticalGlue());
 
-        // --- Koumpi Eggrafis ---
         JButton registerBtn = new JButton("ΕΓΓΡΑΦΗ");
         registerBtn.setBackground(new Color(255, 175, 175));
         registerBtn.setFont(new Font("Arial", Font.BOLD, 18));
@@ -65,35 +58,16 @@ public class CustomerRegistrationFrame extends JFrame {
         registerBtn.setOpaque(true);
         registerBtn.setBorderPainted(false);
 
-        // --- H LOGIKI TIS EGGRAFIS ---
         registerBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Pairnoume ta keimena apo ta pedia
                 String email = emailField.getText();
                 String pass = new String(passField.getPassword());
-                String phone = phoneField.getText();
-                String address = addressField.getText();
-
-                // Ena mikro check an einai adeia ta pedia (Opos grafoume stin anafora gia ta Exceptions!)
-                if (email.isEmpty() || pass.isEmpty() || phone.isEmpty() || address.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Παρακαλώ συμπληρώστε όλα τα πεδία!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
-                    return; // Stamatame tin eggrafi
-                }
-
-                // Ftiaxnoume to antikeimeno Customer
-                Customer newCustomer = new Customer(email, pass, phone, address, 0);
-
-                // To stelnoume sto DatabaseManager na swthei
-                boolean success = DatabaseManager.saveUser(newCustomer);
-
-                if (success) {
-                    JOptionPane.showMessageDialog(null, "Η εγγραφή ολοκληρώθηκε επιτυχώς!");
-                    // Klinoume ayti tin othoni kai mporoume na anoiksoume to Login
-                    dispose(); 
-                    new LoginFrame().setVisible(true);
+                
+                if (email.isEmpty() || pass.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Παρακαλώ συμπληρώστε τα στοιχεία!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Προέκυψε σφάλμα κατά την αποθήκευση.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Η εγγραφή προσομοιώθηκε επιτυχώς!");
                 }
             }
         });
@@ -102,7 +76,6 @@ public class CustomerRegistrationFrame extends JFrame {
         add(registerBtn, BorderLayout.SOUTH);
     }
 
-    // Voithitiki methodos. Twra dexetai to JTextField san paramtero gia na to ftiaxnei
     private JPanel createLargeFieldPanel(String labelText, JTextField textField) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
