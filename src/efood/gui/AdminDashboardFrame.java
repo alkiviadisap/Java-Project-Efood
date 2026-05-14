@@ -2,6 +2,7 @@ package efood.gui;
 
 import efood.models.*;
 import efood.utils.DatabaseManager;
+import efood.main.EfoodApp;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -24,18 +25,16 @@ public class AdminDashboardFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // --- Πάνω μέρος: Τίτλος και Φίλτρο Κατηγοριών ---
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        JLabel titleLabel = new JLabel("Διαχείριση Χρηστών & Αιτήσεων Συνεργατών", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Διαχείριση Χρηστών & Αιτήσεων", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         topPanel.add(titleLabel, BorderLayout.NORTH);
 
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        filterPanel.add(new JLabel("Κατηγορία Προβολής: "));
+        filterPanel.add(new JLabel("Προβολή: "));
         
-        // Καθαρές κατηγορίες που περιλαμβάνουν και τα καταστήματα
         String[] filters = {
             "Εκκρεμείς Αιτήσεις (Διανομείς & Καταστήματα)", 
             "Εγκεκριμένα Καταστήματα", 
@@ -49,8 +48,7 @@ public class AdminDashboardFrame extends JFrame {
         topPanel.add(filterPanel, BorderLayout.SOUTH);
         add(topPanel, BorderLayout.NORTH);
 
-        // --- Πίνακας ---
-        String[] cols = {"Ονοματεπώνυμο", "Email", "Τηλέφωνο", "Πληροφορίες (Όχημα/Κατάστημα)", "Κατάσταση"};
+        String[] cols = {"Ονοματεπώνυμο", "Email", "Τηλέφωνο", "Πληροφορίες", "Κατάσταση"};
         model = new DefaultTableModel(null, cols) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -60,7 +58,7 @@ public class AdminDashboardFrame extends JFrame {
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // --- Κουμπιά Ενεργειών ---
+        // kourmpia gia tis energeies tou admin
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
         
         JButton viewImgBtn = new JButton("📷 Δίπλωμα");
@@ -78,15 +76,17 @@ public class AdminDashboardFrame extends JFrame {
 
         JButton logoutBtn = new JButton("Αποσύνδεση");
 
-        // Σύνδεση Κουμπιών με Μεθόδους
         viewCvBtn.addActionListener(e -> viewCV());
         viewImgBtn.addActionListener(e -> viewImage());
         
-        // Η έγκριση/απόρριψη τώρα δουλεύει για όλους τους συνεργάτες
         approveBtn.addActionListener(e -> updateStatus("APPROVED"));
         rejectBtn.addActionListener(e -> updateStatus("REJECTED"));
         
-        logoutBtn.addActionListener(e -> { dispose(); new LoginFrame().setVisible(true); });
+        logoutBtn.addActionListener(e -> { 
+            EfoodApp.clearSession();
+            dispose(); 
+            new LoginFrame().setVisible(true); 
+        });
 
         bottomPanel.add(viewImgBtn);
         bottomPanel.add(viewCvBtn);
@@ -98,23 +98,24 @@ public class AdminDashboardFrame extends JFrame {
         loadData(); 
     }
 
+    // gemizei ton pinaka analoga to ti exei epileksei o admin apo to combobox
     private void loadData() {
         model.setRowCount(0);
         HashMap<String, User> users = DatabaseManager.loadUsers();
         int selection = filterCombo.getSelectedIndex();
 
         for (User u : users.values()) {
-            if (selection == 0) { // Μόνο Εκκρεμείς (Διανομείς ΚΑΙ Καταστήματα)
+            if (selection == 0) { 
                 if (u instanceof DeliveryDriver && ((DeliveryDriver) u).getApprovalStatus() == DeliveryDriver.Status.PENDING) {
                     addDriverToTable((DeliveryDriver) u);
                 } else if (u instanceof StoreOwner && ((StoreOwner) u).getApprovalStatus() == StoreOwner.Status.PENDING) {
                     addOwnerToTable((StoreOwner) u);
                 }
-            } else if (selection == 1) { // Μόνο Εγκεκριμένα Καταστήματα
+            } else if (selection == 1) { 
                 if (u instanceof StoreOwner && ((StoreOwner) u).getApprovalStatus() == StoreOwner.Status.APPROVED) {
                     addOwnerToTable((StoreOwner) u);
                 }
-            } else if (selection == 2) { // Όλοι οι Χρήστες (Ιστορικό)
+            } else if (selection == 2) { 
                 if (u instanceof DeliveryDriver) addDriverToTable((DeliveryDriver) u);
                 else if (u instanceof StoreOwner) addOwnerToTable((StoreOwner) u);
                 else if (u instanceof Customer) {
@@ -125,17 +126,18 @@ public class AdminDashboardFrame extends JFrame {
     }
 
     private void addDriverToTable(DeliveryDriver d) {
-        String statusStr = (d.getApprovalStatus() == DeliveryDriver.Status.PENDING) ? "Σε Εκκρεμότητα (Διανομέας)" : 
+        String statusStr = (d.getApprovalStatus() == DeliveryDriver.Status.PENDING) ? "Σε Εκκρεμότητα" : 
                           (d.getApprovalStatus() == DeliveryDriver.Status.APPROVED) ? "Εγκεκριμένος" : "Απορριφθείς";
         model.addRow(new Object[]{ d.getFullName(), d.getEmail(), d.getPhoneNumber(), "Όχημα: " + d.getVehicleLicense(), statusStr });
     }
 
     private void addOwnerToTable(StoreOwner o) {
-        String statusStr = (o.getApprovalStatus() == StoreOwner.Status.PENDING) ? "Σε Εκκρεμότητα (Κατάστημα)" : 
-                          (o.getApprovalStatus() == StoreOwner.Status.APPROVED) ? "Εγκεκριμένος Συνεργάτης" : "Απορριφθείς";
+        String statusStr = (o.getApprovalStatus() == StoreOwner.Status.PENDING) ? "Σε Εκκρεμότητα" : 
+                          (o.getApprovalStatus() == StoreOwner.Status.APPROVED) ? "Εγκεκριμένος" : "Απορριφθείς";
         model.addRow(new Object[]{ o.getFullName(), o.getEmail(), o.getPhoneNumber(), "Κατάστημα: " + o.getStoreName(), statusStr });
     }
 
+    // anoigei tin eikona tou diplwmatos tou odigou
     private void viewImage() {
         User u = getSelectedUser();
         if (u == null) return;
@@ -167,6 +169,7 @@ public class AdminDashboardFrame extends JFrame {
         }
     }
 
+    // anoigei to pdf sto pc tou admin
     private void viewCV() {
         User u = getSelectedUser();
         if (u == null) return;
@@ -191,7 +194,7 @@ public class AdminDashboardFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Το αρχείο PDF δεν βρέθηκε.");
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Σφάλμα κατά το άνοιγμα του PDF.");
+            JOptionPane.showMessageDialog(this, "Σφάλμα άνοιγμα του PDF.");
         }
     }
 
@@ -200,23 +203,22 @@ public class AdminDashboardFrame extends JFrame {
         if (u == null) return;
 
         if (u instanceof Customer) {
-            JOptionPane.showMessageDialog(this, "Οι πελάτες δεν χρειάζονται έγκριση.", "Προσοχή", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Οι πελάτες δεν χρειάζονται έγκριση.");
             return;
         }
         
-        // Χρησιμοποιούμε τη νέα μέθοδο του DatabaseManager που ενημερώνει όποιον συνεργάτη επιλέξουμε
         if (DatabaseManager.updateUserStatus(u.getEmail(), statusStr)) {
-            JOptionPane.showMessageDialog(this, "Η κατάσταση του χρήστη " + u.getFullName() + " ενημερώθηκε!");
+            JOptionPane.showMessageDialog(this, "Ενημερώθηκε η κατάσταση!");
             loadData();
         } else {
-            JOptionPane.showMessageDialog(this, "Αποτυχία ενημέρωσης στο αρχείο.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Σφάλμα ενημέρωσης.");
         }
     }
 
     private User getSelectedUser() {
         int row = table.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Παρακαλώ επιλέξτε έναν χρήστη από τον πίνακα.");
+            JOptionPane.showMessageDialog(this, "Επιλέξτε έναν χρήστη.");
             return null;
         }
         String email = (String) model.getValueAt(row, 1);

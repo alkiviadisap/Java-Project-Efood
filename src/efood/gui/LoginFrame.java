@@ -5,7 +5,7 @@ import efood.models.Customer;
 import efood.models.StoreOwner;
 import efood.models.DeliveryDriver;
 import efood.utils.DatabaseManager;
-import efood.main.EfoodApp; // Το χρειαζόμαστε για να σώσουμε το session
+import efood.main.EfoodApp; 
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,10 +39,9 @@ public class LoginFrame extends JFrame {
         emailField = new JTextField();
         passField = new JPasswordField();
 
-        addLabeledInput(mainPanel, "Ηλ. Ταχυδρομείο (Email):", emailField);
+        addLabeledInput(mainPanel, "Email:", emailField);
         addLabeledInput(mainPanel, "Κωδικός Πρόσβασης:", passField);
 
-        // --- Κουμπί Σύνδεσης ---
         JButton loginBtn = new JButton("ΣΥΝΔΕΣΗ");
         loginBtn.setBackground(new Color(239, 68, 68));
         loginBtn.setForeground(Color.WHITE);
@@ -55,7 +54,6 @@ public class LoginFrame extends JFrame {
         mainPanel.add(loginBtn);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        // --- Ενότητα Εγγραφής ---
         JLabel registerAsLabel = new JLabel("Εγγραφή νέου χρήστη ως:");
         registerAsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         registerAsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -75,6 +73,7 @@ public class LoginFrame extends JFrame {
         registerBtn.setMaximumSize(new Dimension(350, 45));
         registerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        // analogws ti exei dialeksei sto combobox anoigei allo frame
         registerBtn.addActionListener(e -> {
             String selected = (String) roleCombo.getSelectedItem();
             dispose();
@@ -96,30 +95,23 @@ public class LoginFrame extends JFrame {
             return; 
         }
 
-        if (!(email.endsWith("@gmail.com") || email.endsWith("@hotmail.com") || 
-              email.endsWith("@yahoo.gr") || email.endsWith("@outlook.com") || 
-              email.endsWith("@hmu.gr") || email.equals("admin@efood.gr"))) {
-            
-            JOptionPane.showMessageDialog(this, "Το email πρέπει να είναι έγκυρο (π.χ. @gmail.com)!", "Λάθος Email", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // --- Έλεγχος για ADMIN ---
+        // hardcoded elegxos gia ton admin wste na mpainei panta
         if (email.equals("admin@efood.gr") && pass.equals("admin123")) {
-            EfoodApp.saveSession(email); // ΑΠΟΘΗΚΕΥΣΗ SESSION
+            EfoodApp.saveSession(email); 
             dispose();
             new AdminDashboardFrame().setVisible(true);
             return;
         }
 
-        // --- Κανονικό Login Χρηστών ---
         HashMap<String, User> allUsers = DatabaseManager.loadUsers();
 
         if (allUsers.containsKey(email)) {
             User user = allUsers.get(email);
             if (user.getPassword().equals(pass)) {
-                EfoodApp.saveSession(email); // ΑΠΟΘΗΚΕΥΣΗ SESSION
+                EfoodApp.saveSession(email); 
                 dispose();
+                
+                // anoigoume to antistoixo dashboard analoga me to instance tou user
                 if (user instanceof Customer) new MainDashboardFrame((Customer) user).setVisible(true);
                 else if (user instanceof StoreOwner) new StoreManagementFrame((StoreOwner) user).setVisible(true);
                 else if (user instanceof DeliveryDriver) new DelivererDashboardFrame((DeliveryDriver) user).setVisible(true);
@@ -127,7 +119,7 @@ public class LoginFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Λάθος Κωδικός Πρόσβασης!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Ο χρήστης δεν βρέθηκε στο σύστημα!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ο χρήστης δεν βρέθηκε.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -142,13 +134,11 @@ public class LoginFrame extends JFrame {
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
     }
 
-    // --- ΠΡΟΣΤΕΘΗΚΕ Η MAIN ΓΙΑ ΝΑ ΤΡΕΧΕΙ ΑΠΕΥΘΕΙΑΣ ---
     public static void main(String[] args) {
         try { 
-            // ΕΠΑΝΑΦΟΡΑ: Το CrossPlatform επιτρέπει στα δικά μας χρώματα να φαίνονται σωστά!
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); 
         } catch (Exception e) {
-            System.out.println("Δεν φορτώθηκε το UI.");
+            System.out.println("No UI loaded.");
         }
         SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
