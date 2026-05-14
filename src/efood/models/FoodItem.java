@@ -1,0 +1,35 @@
+package efood.models;
+
+import java.util.ArrayList;
+
+public class FoodItem extends Product {
+    
+    private ArrayList<String> ingredients; 
+    private boolean isVegan;
+    private double discount;
+
+    public FoodItem(String id, String title, double basePrice, String imagePath, boolean isVegan, double discount) {
+        super(id, title, basePrice, imagePath); 
+        this.isVegan = isVegan;
+        this.discount = discount;
+        this.ingredients = new ArrayList<>(); 
+    }
+
+    @Override
+    public double calculateFinalPrice() {
+        double finalPrice = basePrice - discount;
+        if (finalPrice < 0) {
+            finalPrice = 0;
+        }
+        return finalPrice;
+    }
+
+    public ArrayList<String> getIngredients() { return ingredients; }
+    public void addIngredient(String ingredient) { this.ingredients.add(ingredient); }
+
+    public boolean isVegan() { return isVegan; }
+    public void setVegan(boolean vegan) { this.isVegan = vegan; }
+
+    public double getDiscount() { return discount; }
+    public void setDiscount(double discount) { this.discount = discount; }
+}
