@@ -2,13 +2,15 @@ package efood.models;
 
 public abstract class User {
     // vasika stoixeia pou exoun oloi oi xristes
+    protected String fullName; // to neo pedio pou prosthesame
     protected String email;
     protected String password;
     protected String phoneNumber;
     protected String address;
 
     // constructor
-    public User(String email, String password, String phoneNumber, String address) {
+    public User(String fullName, String email, String password, String phoneNumber, String address) {
+        this.fullName = fullName;
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -18,7 +20,15 @@ public abstract class User {
     // auth tin methodo prepei na tin ftiaxoun oles oi upoklaseis upoxrewtika
     public abstract String getRoleLevel();
 
-    // -- getters & setters -- (paragontai aytomata apo to NetBeans)
+    // -- getters & setters --
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     public String getEmail() {
         return email;
     }
