@@ -4,15 +4,21 @@ import java.util.ArrayList;
 
 public class StoreOwner extends User {
     
-    // extra pedia gia to afm kai ta magazia
     private String vatNumber;
+    private String storeName;
     private ArrayList<String> managedStores;
 
-    // constructor
-    public StoreOwner(String email, String password, String phoneNumber, String address, String vatNumber) {
-        super(email, password, phoneNumber, address); // kaloume to User
+    public enum Status {
+        PENDING, APPROVED, REJECTED
+    }
+    private Status approvalStatus;
+
+    public StoreOwner(String fullName, String email, String password, String phoneNumber, String address, String vatNumber, String storeName) {
+        super(fullName, email, password, phoneNumber, address); 
         this.vatNumber = vatNumber;
+        this.storeName = storeName;
         this.managedStores = new ArrayList<>();
+        this.approvalStatus = Status.PENDING; 
     }
 
     @Override
@@ -20,16 +26,9 @@ public class StoreOwner extends User {
         return "OWNER";
     }
 
-    // getters / setters
-    public String getVatNumber() {
-        return vatNumber;
-    }
-
-    public void setVatNumber(String vatNumber) {
-        this.vatNumber = vatNumber;
-    }
-
-    public ArrayList<String> getManagedStores() {
-        return managedStores;
-    }
+    public String getVatNumber() { return vatNumber; }
+    public String getStoreName() { return storeName; }
+    
+    public Status getApprovalStatus() { return approvalStatus; }
+    public void setApprovalStatus(Status approvalStatus) { this.approvalStatus = approvalStatus; }
 }

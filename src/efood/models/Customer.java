@@ -7,6 +7,7 @@ public class Customer extends User {
     private ArrayList<String> orderHistory; 
     private int loyaltyPoints;
     private ArrayList<String> savedCards; 
+    private ArrayList<String> savedAddresses;
 
     public Customer(String fullName, String email, String password, String phoneNumber, String address, int loyaltyPoints) {
         super(fullName, email, password, phoneNumber, address);
@@ -14,6 +15,8 @@ public class Customer extends User {
         this.loyaltyPoints = loyaltyPoints;
         this.orderHistory = new ArrayList<>(); 
         this.savedCards = new ArrayList<>(); 
+        this.savedAddresses = new ArrayList<>();
+        this.savedAddresses.add(address); 
     }
 
     @Override
@@ -25,10 +28,15 @@ public class Customer extends User {
     public void setLoyaltyPoints(int loyaltyPoints) { this.loyaltyPoints = loyaltyPoints; }
 
     public ArrayList<String> getOrderHistory() { return orderHistory; }
+    // ΝΕΟ: Μέθοδος για να "φορτώνει" το ιστορικό από το CSV
+    public void setOrderHistory(ArrayList<String> orderHistory) { this.orderHistory = orderHistory; }
 
     public void addPoints(int points) { this.loyaltyPoints += points; }
 
     public ArrayList<String> getSavedCards() { return savedCards; }
     public void setSavedCards(ArrayList<String> savedCards) { this.savedCards = savedCards; }
     public void addCard(String cardInfo) { this.savedCards.add(cardInfo); }
+    
+    public ArrayList<String> getSavedAddresses() { return savedAddresses; }
+    public void setSavedAddresses(ArrayList<String> savedAddresses) { this.savedAddresses = savedAddresses; }
 }
