@@ -1,118 +1,269 @@
 package efood.gui;
 
+import efood.models.Customer;
+import efood.utils.DatabaseManager;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class CartCheckoutFrame extends JFrame {
 
-    public CartCheckoutFrame() {
-        // 1. Βασικές ρυθμίσεις παραθύρου (Ομοιόμορφο μέγεθος Laptop Layout)
-        setTitle("Καλάθι & Checkout");
-        setSize(1000, 800); 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private Customer currentCustomer;
+    private ArrayList<String[]> myCart; 
+    private double totalAmount = 0.0;
+    private double discount = 0.0;
+    private double loyaltyDiscount = 0.0; 
+
+    private JLabel finalTotal;
+    private JButton finishBtn;
+    private JCheckBox loyaltyCheck; 
+    
+    private HashSet<String> usedPromoCodes = new HashSet<>();
+
+    public CartCheckoutFrame(Customer customer, ArrayList<String[]> cart) {
+        this.currentCustomer = customer;
+        this.myCart = cart;
+        
+        setTitle("Ταμείο");
+        setSize(900, 850); 
         setLocationRelativeTo(null);
-        setResizable(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // 2. Κύριο Panel με μεγάλα περιθώρια (100px δεξιά-αριστερά) για ομοιομορφία
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBackground(new Color(245, 245, 245));
-        mainPanel.setBorder(new EmptyBorder(30, 100, 20, 100));
+        mainPanel.setBorder(new EmptyBorder(20, 100, 20, 100));
 
-        // --- Τίτλος Ενότητας ---
-        JLabel orderLabel = new JLabel("Η Παραγγελία σας:");
-        orderLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        orderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(orderLabel);
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        JLabel title = new JLabel("Ολοκλήρωση Παραγγελίας");
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(title);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // --- Πίνακας Προϊόντων ---
-        String[] columns = {"Προϊόν", "Ποσότητα", "Τιμή Μονάδος", "Σύνολο"};
-        Object[][] data = {
-            {"Burger", "1", "5.50€", "5.50€"},
-            {"Pizza", "1", "8.00€", "8.00€"},
-            {"Coca Cola", "2", "1.50€", "3.00€"}
-        };
-
-        JTable table = new JTable(new DefaultTableModel(data, columns));
+        String[] cols = {"Προϊόν", "Τιμή"};
+        DefaultTableModel model = new DefaultTableModel(null, cols) { @Override public boolean isCellEditable(int r, int c) { return false; } };
+        for (String[] item : cart) {
+            model.addRow(new Object[]{item[0], item[1] + "€"});
+            totalAmount += Double.parseDouble(item[1].replace(",", "."));
+        }
+        JTable table = new JTable(model);
         table.setRowHeight(30);
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setMaximumSize(new Dimension(800, 200));
-        scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(scrollPane);
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 30)));
+        mainPanel.add(new JScrollPane(table));
+        
+        JButton removeBtn = new JButton("🗑️ Διαγραφή Επιλεγμένου");
+        removeBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        removeBtn.setBackground(new Color(255, 100, 100));
+        removeBtn.setForeground(Color.WHITE);
+        
+        removeBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Επίλεξε ένα προϊόν από τον πίνακα.");
+                return;
+            }
+            
+            String nameToRemove = (String) model.getValueAt(row, 0);
+            
+            Iterator<String[]> it = myCart.iterator();
+            while (it.hasNext()) {
+                String[] item = it.next();
+                if (item[0].equals(nameToRemove)) {
+                    totalAmount -= Double.parseDouble(item[1].replace(",", ".")); 
+                    it.remove(); 
+                    break; 
+                }
+            }
+            
+            model.removeRow(row); 
+            updateTotals(); 
+        });
+        
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        mainPanel.add(removeBtn);
 
-        // --- Promo Code Section ---
-        JPanel promoPanel = new JPanel(new BorderLayout(15, 0));
-        promoPanel.setOpaque(false);
-        promoPanel.setMaximumSize(new Dimension(600, 40));
-        
-        JTextField promoField = new JTextField("Promo Code...");
-        JButton applyBtn = new JButton("Apply");
-        applyBtn.setBackground(new Color(200, 200, 200));
-        
-        promoPanel.add(promoField, BorderLayout.CENTER);
-        promoPanel.add(applyBtn, BorderLayout.EAST);
-        mainPanel.add(promoPanel);
+        finalTotal = new JLabel("Σύνολο: " + String.format("%.2f", totalAmount) + "€");
+        finalTotal.setFont(new Font("Arial", Font.BOLD, 22));
+        finalTotal.setAlignmentX(Component.CENTER_ALIGNMENT);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        mainPanel.add(finalTotal);
 
-        // --- Loyalty & Payment ---
-        JCheckBox loyaltyCheck = new JCheckBox("Εξαργύρωση πόντων Loyalty");
-        loyaltyCheck.setOpaque(false);
-        loyaltyCheck.setFont(new Font("Arial", Font.PLAIN, 14));
+        loyaltyCheck = new JCheckBox("Εξαργύρωση " + currentCustomer.getLoyaltyPoints() + " Πόντων Loyalty");
         loyaltyCheck.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loyaltyCheck.setFont(new Font("Arial", Font.BOLD, 14));
+        loyaltyCheck.setForeground(new Color(50, 150, 50));
+        
+        loyaltyCheck.addActionListener(e -> {
+            if (loyaltyCheck.isSelected()) {
+                if (currentCustomer.getLoyaltyPoints() > 0) {
+                    loyaltyDiscount = currentCustomer.getLoyaltyPoints() * 0.01;
+                    updateTotals();
+                    JOptionPane.showMessageDialog(this, "Κέρδισες " + String.format("%.2f", loyaltyDiscount) + "€ έκπτωση από τους πόντους σου!");
+                } else {
+                    loyaltyCheck.setSelected(false);
+                    JOptionPane.showMessageDialog(this, "Δεν έχεις αρκετούς πόντους Loyalty.");
+                }
+            } else {
+                loyaltyDiscount = 0.0;
+                updateTotals(); 
+            }
+        });
         mainPanel.add(loyaltyCheck);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        JPanel paymentRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        paymentRow.setOpaque(false);
+        JPanel promoPanel = new JPanel(new FlowLayout());
+        JTextField promoField = new JTextField("Promo Code...");
+        promoField.setPreferredSize(new Dimension(200, 35));
+        promoField.addFocusListener(new FocusAdapter() {
+            @Override public void focusGained(FocusEvent e) { if(promoField.getText().equals("Promo Code...")) promoField.setText(""); }
+            @Override public void focusLost(FocusEvent e) { if(promoField.getText().isEmpty()) promoField.setText("Promo Code..."); }
+        });
+        
+        JButton applyBtn = new JButton("Εφαρμογή");
+        applyBtn.addActionListener(e -> {
+            String code = promoField.getText().trim().toUpperCase();
+            
+            if (code.equals("HMMY20") || code.equals("ΗΜΜΥ20")) {
+                if (usedPromoCodes.contains(code)) {
+                    JOptionPane.showMessageDialog(this, "Έχεις ήδη χρησιμοποιήσει αυτόν τον κωδικό!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    usedPromoCodes.add(code); 
+                    discount = totalAmount * 0.20;
+                    updateTotals(); 
+                    JOptionPane.showMessageDialog(this, "Έκπτωση 20% εφαρμόστηκε!");
+                }
+            } 
+            else if (!MainDashboardFrame.activePinataCode.isEmpty() && code.equals(MainDashboardFrame.activePinataCode)) {
+                if (System.currentTimeMillis() > MainDashboardFrame.pinataExpireTime) {
+                    JOptionPane.showMessageDialog(this, "Ο κωδικός έχει λήξει! Πάτα πάλι την πινιάτα για νέο.", "Προσοχή", JOptionPane.WARNING_MESSAGE);
+                } else if (usedPromoCodes.contains(code)) {
+                    JOptionPane.showMessageDialog(this, "Έχεις ήδη χρησιμοποιήσει αυτόν τον κωδικό!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    usedPromoCodes.add(code); 
+                    discount = totalAmount * MainDashboardFrame.activePinataDiscount; 
+                    updateTotals(); 
+                    JOptionPane.showMessageDialog(this, "Έκπτωση " + (int)(MainDashboardFrame.activePinataDiscount * 100) + "% εφαρμόστηκε!");
+                }
+            } 
+            else {
+                JOptionPane.showMessageDialog(this, "Άκυρος Κωδικός.", "Προσοχή", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        promoPanel.add(promoField);
+        promoPanel.add(applyBtn);
+        mainPanel.add(promoPanel);
+
+        JPanel paymentRow = new JPanel(new FlowLayout());
         paymentRow.add(new JLabel("Τρόπος Πληρωμής:"));
-        paymentRow.add(new JComboBox<>(new String[]{"Πιστωτική Κάρτα", "PayPal", "Αντικαταβολή"}));
-        paymentRow.setMaximumSize(new Dimension(600, 40));
+        ArrayList<String> methods = new ArrayList<>();
+        String defaultCard = null;
+        for (String card : currentCustomer.getSavedCards()) {
+            methods.add(card);
+            if (card.contains("(Προεπιλογή)")) defaultCard = card;
+        }
+        methods.add("Μετρητά (Αντικαταβολή)");
+        
+        JComboBox<String> paymentCombo = new JComboBox<>(methods.toArray(new String[0]));
+        if (defaultCard != null) paymentCombo.setSelectedItem(defaultCard);
+        else paymentCombo.setSelectedItem("Μετρητά (Αντικαταβολή)");
+        paymentRow.add(paymentCombo);
         mainPanel.add(paymentRow);
-        
-        mainPanel.add(Box.createVerticalGlue());
 
-        // --- Σύνολα (Totals) ---
-        JPanel totalsPanel = new JPanel();
-        totalsPanel.setLayout(new BoxLayout(totalsPanel, BoxLayout.Y_AXIS));
-        totalsPanel.setOpaque(false);
-        totalsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         
-        JLabel totalLabel = new JLabel("Τελικό Ποσό: 16.50€");
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        totalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        finishBtn = new JButton("ΟΛΟΚΛΗΡΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ (" + String.format("%.2f", totalAmount) + "€)");
+        finishBtn.setBackground(new Color(150, 255, 150));
+        finishBtn.setFont(new Font("Arial", Font.BOLD, 18));
+        finishBtn.setPreferredSize(new Dimension(0, 60));
         
-        JLabel discountLabel = new JLabel("Εκπτώσεις: 0.00€");
-        discountLabel.setForeground(Color.GRAY);
-        discountLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        totalsPanel.add(totalLabel);
-        totalsPanel.add(discountLabel);
-        mainPanel.add(totalsPanel);
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 25)));
+        finishBtn.addActionListener(e -> {
+            if (myCart.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Το καλάθι είναι άδειο!");
+                return;
+            }
+            
+            finishBtn.setEnabled(false); 
+            finishBtn.setText("Επεξεργασία πληρωμής... ⏳");
+            finishBtn.setBackground(new Color(200, 200, 200));
 
-        // --- Checkout Button (South) ---
-        JButton checkoutBtn = new JButton("ΟΛΟΚΛΗΡΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ");
-        checkoutBtn.setBackground(new Color(255, 175, 175)); // Σομόν
-        checkoutBtn.setFont(new Font("Arial", Font.BOLD, 18));
-        checkoutBtn.setPreferredSize(new Dimension(1000, 70));
-        checkoutBtn.setOpaque(true);
-        checkoutBtn.setBorderPainted(false);
-        
+            Thread paymentThread = new Thread(() -> {
+                try {
+                    Thread.sleep(2000); 
+                } catch (InterruptedException ex) {}
+
+                SwingUtilities.invokeLater(() -> {
+                    double finalPay = totalAmount - discount - loyaltyDiscount;
+                    if (finalPay < 0) finalPay = 0; 
+                    
+                    // ΝΕΟ: Αποθηκεύει το ID της παραγγελίας για να το ψάχνει μετά στο orders.csv
+                    String orderId = "#" + (1000 + (int)(Math.random() * 9000));
+                    String details = "ID: " + orderId + "\nΣύνολο: " + String.format("%.2f", finalPay) + "€\nΤρόπος: " + paymentCombo.getSelectedItem();
+                    currentCustomer.getOrderHistory().add(details);
+                    
+                    if (loyaltyCheck.isSelected()) {
+                        currentCustomer.setLoyaltyPoints(0); 
+                    }
+                    currentCustomer.addPoints(10); 
+                    
+                    DatabaseManager.deleteUser(currentCustomer.getEmail());
+                    DatabaseManager.saveUser(currentCustomer);
+                    
+                    String storeName = "Κατάστημα eFood";
+                    if (!myCart.isEmpty()) storeName = myCart.get(0)[0].split(" - ")[0]; 
+                    
+                    double fee = totalAmount * 0.15; // αμοιβή οδηγού
+                    String rewardStr = String.format("%.2f", fee < 2.0 ? 2.0 : fee) + "€";
+                    
+                    String deliveryAddress = currentCustomer.getAddress();
+                    if (!currentCustomer.getSavedAddresses().isEmpty()) {
+                        for(String ad : currentCustomer.getSavedAddresses()) {
+                            if (ad.contains("(Προεπιλογή)")) { deliveryAddress = ad.replace(" (Προεπιλογή)", ""); break; }
+                        }
+                        if (deliveryAddress.equals(currentCustomer.getAddress())) deliveryAddress = currentCustomer.getSavedAddresses().get(0).replace(" (Προεπιλογή)", "");
+                    }
+                    
+                    DatabaseManager.saveOrder(orderId, storeName, deliveryAddress, rewardStr);
+                    
+                    JOptionPane.showMessageDialog(CartCheckoutFrame.this, "Η πληρωμή εγκρίθηκε!\nΗ παραγγελία εστάλη επιτυχώς!\nΜπορείς να τη δεις στο 'Ενεργή Παραγγελία'.");
+                    dispose();
+                    new MainDashboardFrame(currentCustomer, new ArrayList<>()).setVisible(true);
+                });
+            });
+            paymentThread.start(); 
+        });
+
+        JButton backBtn = new JButton("← Πίσω (Επεξεργασία Καλαθιού)");
+        backBtn.setBackground(new Color(255, 180, 180));
+        backBtn.setPreferredSize(new Dimension(0, 40));
+        backBtn.addActionListener(e -> {
+            dispose();
+            new MainDashboardFrame(currentCustomer, myCart).setVisible(true);
+        });
+
+        bottomPanel.add(backBtn, BorderLayout.NORTH);
+        bottomPanel.add(finishBtn, BorderLayout.CENTER);
+
         add(mainPanel, BorderLayout.CENTER);
-        add(checkoutBtn, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void updateTotals() {
+        double finalPay = totalAmount - discount - loyaltyDiscount;
+        if (finalPay < 0) finalPay = 0.0; 
+        
+        if (discount > 0 || loyaltyDiscount > 0) {
+            finalTotal.setText("Σύνολο (Με έκπτωση): " + String.format("%.2f", finalPay) + "€");
+        } else {
+            finalTotal.setText("Σύνολο: " + String.format("%.2f", finalPay) + "€");
         }
-        SwingUtilities.invokeLater(() -> new CartCheckoutFrame().setVisible(true));
+        
+        finishBtn.setText("ΟΛΟΚΛΗΡΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ (" + String.format("%.2f", finalPay) + "€)");
     }
 }

@@ -1,4 +1,8 @@
-package efood.gui2; // ΣΙΓΟΥΡΕΨΟΥ ΟΤΙ ΤΟ PACKAGE EINAI TO ΣΩΣΤΟ ΣΤΟ NETBEANS
+package efood.gui;
+
+import efood.models.Customer;
+import efood.utils.DatabaseManager;
+import efood.main.EfoodApp; 
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -9,6 +13,7 @@ import java.awt.event.ActionListener;
 
 public class CustomerRegistrationFrame extends JFrame {
 
+    private JTextField nameField; 
     private JTextField emailField;
     private JPasswordField passField; 
     private JTextField phoneField;
@@ -16,7 +21,7 @@ public class CustomerRegistrationFrame extends JFrame {
 
     public CustomerRegistrationFrame() {
         setTitle("Φόρμα Εγγραφής Πελάτη");
-        setSize(950, 750); 
+        setSize(950, 800); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -33,21 +38,25 @@ public class CustomerRegistrationFrame extends JFrame {
         mainPanel.add(titleLabel);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 
+        nameField = new JTextField();
         emailField = new JTextField();
         passField = new JPasswordField();
         phoneField = new JTextField();
         addressField = new JTextField();
 
+        mainPanel.add(createLargeFieldPanel("Ονοματεπώνυμο:", nameField));
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
         mainPanel.add(createLargeFieldPanel("Email:", emailField));
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        mainPanel.add(createLargeFieldPanel("Password:", passField));
+        mainPanel.add(createLargeFieldPanel("Κωδικός Πρόσβασης:", passField));
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        mainPanel.add(createLargeFieldPanel("Phone number:", phoneField));
+        mainPanel.add(createLargeFieldPanel("Τηλέφωνο Επικοινωνίας:", phoneField));
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        mainPanel.add(createLargeFieldPanel("Address:", addressField));
+        mainPanel.add(createLargeFieldPanel("Διεύθυνση Παράδοσης:", addressField));
 
         mainPanel.add(Box.createVerticalGlue());
 
@@ -61,21 +70,62 @@ public class CustomerRegistrationFrame extends JFrame {
         registerBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String email = emailField.getText();
+                String name = nameField.getText().trim();
+                String email = emailField.getText().trim();
                 String pass = new String(passField.getPassword());
-                
-                if (email.isEmpty() || pass.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Παρακαλώ συμπληρώστε τα στοιχεία!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+                String phone = phoneField.getText().trim();
+                String address = addressField.getText().trim();
+
+                // basikoi elegxoi
+                if (name.isEmpty() || email.isEmpty() || pass.isEmpty() || phone.isEmpty() || address.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Συμπλήρωσε όλα τα πεδία!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
+                    return; 
+                }
+
+                // elegxos mono gia grammata kai kena sto onoma
+                if (!name.matches("^[a-zA-Zα-ωΑ-ΩάέήίόύώςΆΈΉΊΌΎΏ\\s]+$")) {
+                    JOptionPane.showMessageDialog(null, "Το ονοματεπώνυμο πρέπει να περιέχει μόνο γράμματα!", "Λάθος Όνομα", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (!(email.endsWith("@gmail.com") || email.endsWith("@hotmail.com") || 
+                      email.endsWith("@yahoo.gr") || email.endsWith("@outlook.com") || 
+                      email.endsWith("@hmu.gr"))) {
+                    JOptionPane.showMessageDialog(null, "Μη έγκυρο email.", "Λάθος", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (phone.length() != 10 || !phone.matches("\\d+")) {
+                    JOptionPane.showMessageDialog(null, "Το τηλέφωνο πρέπει να έχει 10 ψηφία.", "Λάθος", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Customer newCustomer = new Customer(name, email, pass, phone, address, 0);
+                boolean success = DatabaseManager.saveUser(newCustomer);
+
+                if (success) {
+                    JOptionPane.showMessageDialog(null, "Επιτυχής εγγραφή!");
+                    EfoodApp.saveSession(email);
+                    dispose(); 
+                    new MainDashboardFrame(newCustomer).setVisible(true);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Η εγγραφή προσομοιώθηκε επιτυχώς!");
+                    JOptionPane.showMessageDialog(null, "Σφάλμα αποθήκευσης.", "Λάθος", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
+
+        JButton backBtn = new JButton("Επιστροφή");
+        backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backBtn.addActionListener(e -> { dispose(); new LoginFrame().setVisible(true); });
+        
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        mainPanel.add(backBtn);
 
         add(mainPanel, BorderLayout.CENTER);
         add(registerBtn, BorderLayout.SOUTH);
     }
 
+    // boithitiki methodos gia ta textfields
     private JPanel createLargeFieldPanel(String labelText, JTextField textField) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -97,15 +147,5 @@ public class CustomerRegistrationFrame extends JFrame {
         panel.add(textField);
         
         return panel;
-    }
-
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (Exception e) {}
-
-        SwingUtilities.invokeLater(() -> {
-            new CustomerRegistrationFrame().setVisible(true);
-        });
     }
 }
