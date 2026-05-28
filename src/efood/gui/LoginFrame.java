@@ -73,7 +73,6 @@ public class LoginFrame extends JFrame {
         registerBtn.setMaximumSize(new Dimension(350, 45));
         registerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        // analogws ti exei dialeksei sto combobox anoigei allo frame
         registerBtn.addActionListener(e -> {
             String selected = (String) roleCombo.getSelectedItem();
             dispose();
@@ -95,7 +94,6 @@ public class LoginFrame extends JFrame {
             return; 
         }
 
-        // hardcoded elegxos gia ton admin wste na mpainei panta
         if (email.equals("admin@efood.gr") && pass.equals("admin123")) {
             EfoodApp.saveSession(email); 
             dispose();
@@ -111,7 +109,6 @@ public class LoginFrame extends JFrame {
                 EfoodApp.saveSession(email); 
                 dispose();
                 
-                // anoigoume to antistoixo dashboard analoga me to instance tou user
                 if (user instanceof Customer) new MainDashboardFrame((Customer) user).setVisible(true);
                 else if (user instanceof StoreOwner) new StoreManagementFrame((StoreOwner) user).setVisible(true);
                 else if (user instanceof DeliveryDriver) new DelivererDashboardFrame((DeliveryDriver) user).setVisible(true);
@@ -135,11 +132,16 @@ public class LoginFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        try { 
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); 
-        } catch (Exception e) {
-            System.out.println("No UI loaded.");
-        }
+        // ΕΝΕΡΓΟΠΟΙΗΣΗ ΤΟΥ NIMBUS THEME
+        try {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {}
+        
         SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
     }
 }

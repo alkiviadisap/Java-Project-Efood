@@ -51,7 +51,6 @@ public class DelivererRegistrationFrame extends JFrame {
         addFormInput(mainPanel, "Διεύθυνση Κατοικίας:", addressField);
         addFormInput(mainPanel, "Αριθμός Διπλώματος:", licenseField);
 
-        // koumpi gia anevasma diplwmatos
         JButton uploadImgBtn = new JButton("📷 Φωτογραφία Διπλώματος");
         uploadImgBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         uploadImgBtn.setMaximumSize(new Dimension(500, 35));
@@ -66,7 +65,6 @@ public class DelivererRegistrationFrame extends JFrame {
         mainPanel.add(uploadImgBtn);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // koumpi gia anevasma viografikou
         JButton uploadCvBtn = new JButton("📄 Βιογραφικό Σημείωμα (PDF)");
         uploadCvBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         uploadCvBtn.setMaximumSize(new Dimension(500, 35));
@@ -81,7 +79,6 @@ public class DelivererRegistrationFrame extends JFrame {
         mainPanel.add(uploadCvBtn);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        // ftiaxnoume to captcha
         JPanel captchaWrapper = new JPanel(new GridLayout(1, 2, 10, 0));
         captchaWrapper.setMaximumSize(new Dimension(500, 40));
         captchaWrapper.setOpaque(false);
@@ -116,7 +113,6 @@ public class DelivererRegistrationFrame extends JFrame {
                 JOptionPane.showMessageDialog(null, "Συμπληρώστε όλα τα πεδία!"); return;
             }
 
-            // mono grammata sto onoma
             if (!name.matches("^[a-zA-Zα-ωΑ-ΩάέήίόύώςΆΈΉΊΌΎΏ\\s]+$")) {
                 JOptionPane.showMessageDialog(null, "Το ονοματεπώνυμο πρέπει να περιέχει μόνο γράμματα!", "Λάθος Όνομα", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -140,7 +136,6 @@ public class DelivererRegistrationFrame extends JFrame {
                 JOptionPane.showMessageDialog(null, "Ανεβάστε το Βιογραφικό σας (CV)!"); return;
             }
             
-            // elegxos captcha
             if (!userCaptcha.equalsIgnoreCase(currentCaptcha.replace(" ", ""))) {
                 JOptionPane.showMessageDialog(null, "Λάθος κωδικός CAPTCHA.");
                 currentCaptcha = generateCaptcha(); 
@@ -180,7 +175,6 @@ public class DelivererRegistrationFrame extends JFrame {
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
     }
 
-    // paragwgh tyxaiou string gia to captcha
     private String generateCaptcha() {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
         StringBuilder sb = new StringBuilder();

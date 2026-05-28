@@ -17,10 +17,7 @@ public class DelivererDashboardFrame extends JFrame {
     public DelivererDashboardFrame(DeliveryDriver currentDriver) {
         setTitle("Dashboard Διανομέα");
         setSize(950, 750); 
-        
-        // FIX: Το πρόγραμμα κρατάει το Session. Το session.txt σβήνει ΜΟΝΟ αν πατήσεις "Αποσύνδεση".
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
         setLocationRelativeTo(null);
         setResizable(false);
         setLayout(new BorderLayout());
@@ -130,7 +127,6 @@ public class DelivererDashboardFrame extends JFrame {
             
             JButton acceptBtn = new JButton("ΑΠΟΔΟΧΗ ΕΠΙΛΕΓΜΕΝΗΣ ΠΑΡΑΓΓΕΛΙΑΣ");
             acceptBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-            acceptBtn.setFocusPainted(false);
             mainPanel.add(acceptBtn);
 
             mainPanel.add(Box.createRigidArea(new Dimension(0, 40)));

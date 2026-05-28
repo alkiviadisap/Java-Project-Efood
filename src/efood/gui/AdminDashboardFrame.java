@@ -58,7 +58,6 @@ public class AdminDashboardFrame extends JFrame {
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // kourmpia gia tis energeies tou admin
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
         
         JButton viewImgBtn = new JButton("📷 Δίπλωμα");
@@ -98,7 +97,6 @@ public class AdminDashboardFrame extends JFrame {
         loadData(); 
     }
 
-    // gemizei ton pinaka analoga to ti exei epileksei o admin apo to combobox
     private void loadData() {
         model.setRowCount(0);
         HashMap<String, User> users = DatabaseManager.loadUsers();
@@ -137,7 +135,6 @@ public class AdminDashboardFrame extends JFrame {
         model.addRow(new Object[]{ o.getFullName(), o.getEmail(), o.getPhoneNumber(), "Κατάστημα: " + o.getStoreName(), statusStr });
     }
 
-    // anoigei tin eikona tou diplwmatos tou odigou
     private void viewImage() {
         User u = getSelectedUser();
         if (u == null) return;
@@ -169,7 +166,6 @@ public class AdminDashboardFrame extends JFrame {
         }
     }
 
-    // anoigei to pdf sto pc tou admin
     private void viewCV() {
         User u = getSelectedUser();
         if (u == null) return;

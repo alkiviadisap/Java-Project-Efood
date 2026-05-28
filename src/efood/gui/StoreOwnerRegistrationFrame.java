@@ -1,5 +1,8 @@
 package efood.gui;
 
+import efood.models.StoreOwner;
+import efood.utils.DatabaseManager;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -7,108 +10,132 @@ import java.awt.*;
 
 public class StoreOwnerRegistrationFrame extends JFrame {
 
+    private JTextField nameField; 
+    private JTextField emailField;
+    private JPasswordField passField;
+    private JTextField addressField;
+    private JTextField phoneField;
+    private JTextField vatField; 
+    private JTextField storeNameField; 
+
     public StoreOwnerRegistrationFrame() {
-        // Ρυθμίσεις Παραθύρου - Laptop Layout
-        setTitle("Store Owner Registration Frame");
-        setSize(950, 850); // Αυξημένο ύψος για να χωρέσει άνετα όλα τα πεδία
+        setTitle("Εγγραφή Ιδιοκτήτη Καταστήματος");
+        setSize(950, 850); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
         setLayout(new BorderLayout());
 
-        // Κύριο Panel
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(new Color(245, 245, 245));
-        mainPanel.setBorder(new EmptyBorder(40, 250, 40, 250)); // Margins για laptop
+        mainPanel.setBorder(new EmptyBorder(20, 250, 20, 250));
 
-        // --- Header ---
-        JLabel headerLabel = new JLabel("Εγγραφή Ιδιοκτήτη Καταστήματος");
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel headerLabel = new JLabel("Εγγραφή Συνεργάτη");
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 22));
         headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         mainPanel.add(headerLabel);
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 30)));
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        // --- Πεδία Εισαγωγής ---
-        addLabeledInput(mainPanel, "Email:");
-        addLabeledInput(mainPanel, "Password:");
-        addLabeledInput(mainPanel, "Store Address:");
-        addLabeledInput(mainPanel, "Phone Number:");
-        addLabeledInput(mainPanel, "Vat Number:");
+        nameField = new JTextField();
+        emailField = new JTextField();
+        passField = new JPasswordField();
+        addressField = new JTextField();
+        phoneField = new JTextField();
+        vatField = new JTextField();
+        storeNameField = new JTextField(); 
+
+        addLabeledInput(mainPanel, "Ονοματεπώνυμο Ιδιοκτήτη:", nameField);
+        addLabeledInput(mainPanel, "Email:", emailField);
+        addLabeledInput(mainPanel, "Κωδικός Πρόσβασης:", passField);
+        addLabeledInput(mainPanel, "Τηλέφωνο Επικοινωνίας:", phoneField);
+        addLabeledInput(mainPanel, "Επωνυμία Καταστήματος:", storeNameField); 
+        addLabeledInput(mainPanel, "Διεύθυνση Καταστήματος:", addressField);
+        addLabeledInput(mainPanel, "ΑΦΜ Επιχείρησης:", vatField);
 
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // --- CAPTCHA Section ---
-        JPanel captchaWrapper = new JPanel(new GridLayout(1, 2, 10, 0));
-        captchaWrapper.setMaximumSize(new Dimension(450, 50));
-        captchaWrapper.setOpaque(false);
-        
-        JLabel captchaBox = new JLabel("CAPTCHA", SwingConstants.CENTER);
-        captchaBox.setOpaque(true);
-        captchaBox.setBackground(new Color(78, 150, 150)); // Το πετρόλ χρώμα από το mockup
-        captchaBox.setForeground(Color.WHITE);
-        captchaBox.setFont(new Font("Monospaced", Font.BOLD, 16));
-        
-        JTextField captchaInput = new JTextField();
-        captchaInput.setBorder(new LineBorder(Color.LIGHT_GRAY));
-        
-        captchaWrapper.add(captchaBox);
-        captchaWrapper.add(captchaInput);
-        mainPanel.add(captchaWrapper);
-
-        // --- Info Note ---
-        JLabel infoNote = new JLabel("<html><center>*The information will be verified to<br>ensure the validity of the Vat Number</center></html>");
-        infoNote.setFont(new Font("Arial", Font.ITALIC, 12));
-        infoNote.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        mainPanel.add(infoNote);
-
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 30)));
-
-        // --- Submit Button ---
-        JButton submitBtn = new JButton("Submit Application");
-        submitBtn.setBackground(new Color(100, 255, 100)); // Πράσινο
+        JButton submitBtn = new JButton("ΥΠΟΒΟΛΗ");
+        submitBtn.setBackground(new Color(100, 255, 100));
         submitBtn.setFont(new Font("Arial", Font.BOLD, 16));
         submitBtn.setMaximumSize(new Dimension(450, 55));
         submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        submitBtn.setFocusPainted(false);
+
+        submitBtn.addActionListener(e -> {
+            String name = nameField.getText().trim();
+            String email = emailField.getText().trim();
+            String pass = new String(passField.getPassword());
+            String address = addressField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String vat = vatField.getText().trim();
+            String storeName = storeNameField.getText().trim();
+
+            if (name.isEmpty() || email.isEmpty() || pass.isEmpty() || phone.isEmpty() || address.isEmpty() || vat.isEmpty() || storeName.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Συμπληρώστε όλα τα πεδία!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
+                return; 
+            }
+            
+            if (!name.matches("^[a-zA-Zα-ωΑ-ΩάέήίόύώςΆΈΉΊΌΎΏ\\s]+$")) {
+                JOptionPane.showMessageDialog(null, "Το ονοματεπώνυμο πρέπει να περιέχει μόνο γράμματα!", "Λάθος Όνομα", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!(email.endsWith("@gmail.com") || email.endsWith("@hotmail.com") || email.endsWith("@yahoo.gr") || email.endsWith("@hmu.gr"))) {
+                JOptionPane.showMessageDialog(null, "Μη έγκυρο email.", "Λάθος", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (phone.length() != 10 || !phone.matches("\\d+")) {
+                JOptionPane.showMessageDialog(null, "Λάθος τηλέφωνο.", "Λάθος", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (vat.length() != 9 || !vat.matches("\\d+")) {
+                JOptionPane.showMessageDialog(null, "Το ΑΦΜ πρέπει να έχει 9 αριθμούς.", "Λάθος", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            StoreOwner newOwner = new StoreOwner(name, email, pass, phone, address, vat, storeName);
+
+            if (DatabaseManager.saveUser(newOwner)) {
+                JOptionPane.showMessageDialog(null, "Η εγγραφή ολοκληρώθηκε!");
+                dispose(); 
+                new LoginFrame().setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(null, "Σφάλμα αποθήκευσης.", "Λάθος", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         mainPanel.add(submitBtn);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        // --- Back to Login Link ---
-        JButton backBtn = new JButton("Back to Login");
+        JButton backBtn = new JButton("Επιστροφή");
         backBtn.setForeground(Color.BLUE);
         backBtn.setBorderPainted(false);
         backBtn.setContentAreaFilled(false);
         backBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
+        
         mainPanel.add(backBtn);
-
         add(mainPanel, BorderLayout.CENTER);
     }
 
-    // Βοηθητική μέθοδος για Labels και Fields
-    private void addLabeledInput(JPanel panel, String text) {
+    private void addLabeledInput(JPanel panel, String text, JTextField field) {
         JLabel label = new JLabel(text);
-        label.setFont(new Font("Arial", Font.BOLD, 14));
+        label.setFont(new Font("Arial", Font.BOLD, 13));
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(label);
-        panel.add(Box.createRigidArea(new Dimension(0, 5)));
-
-        JTextField field = new JTextField();
-        field.setMaximumSize(new Dimension(450, 40));
-        field.setPreferredSize(new Dimension(450, 40));
+        
+        field.setMaximumSize(new Dimension(450, 35));
+        field.setPreferredSize(new Dimension(450, 35));
         field.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(Color.LIGHT_GRAY),
                 new EmptyBorder(0, 10, 0, 10)));
         panel.add(field);
-        panel.add(Box.createRigidArea(new Dimension(0, 15)));
-    }
-
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); } 
-        catch (Exception e) {}
-        SwingUtilities.invokeLater(() -> new StoreOwnerRegistrationFrame().setVisible(true));
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
     }
 }
