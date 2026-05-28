@@ -2,6 +2,7 @@ package efood.models;
 
 import java.util.ArrayList;
 
+// Κληρονομεί από το Product
 public class FoodItem extends Product {
     
     private ArrayList<String> ingredients; 
@@ -15,9 +16,11 @@ public class FoodItem extends Product {
         this.ingredients = new ArrayList<>(); 
     }
 
+    // Overriding τη μέθοδο του Product
     @Override
     public double calculateFinalPrice() {
         double finalPrice = basePrice - discount;
+        // Ασφάλεια για να μην βγει αρνητική τιμή
         if (finalPrice < 0) {
             finalPrice = 0;
         }

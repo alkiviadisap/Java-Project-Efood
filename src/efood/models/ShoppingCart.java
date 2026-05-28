@@ -1,8 +1,9 @@
-package efood.models;
+ package efood.models;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
+// Το καλάθι του πελάτη
 public class ShoppingCart {
     
     private ArrayList<Product> itemsList;
@@ -17,10 +18,10 @@ public class ShoppingCart {
 
     public void addItem(Product p) {
         itemsList.add(p);
-        calculateTotal(); 
+        calculateTotal(); // Υπολογίζει ξανά το σύνολο
     }
 
-    // upologismos me xrisi iterator sumfwna me tin ekfwnisi tou project
+    // Υπολογισμός με χρήση iterator (όπως ζητάει η εκφώνηση)
     public double calculateTotal() {
         totalAmount = 0.0; 
         
@@ -39,6 +40,7 @@ public class ShoppingCart {
     public String getAppliedPromoCode() { return appliedPromoCode; }
     public void setAppliedPromoCode(String appliedPromoCode) { this.appliedPromoCode = appliedPromoCode; }
     
+    // Αδειάζει το καλάθι
     public void clearCart() {
         itemsList.clear();
         totalAmount = 0.0;

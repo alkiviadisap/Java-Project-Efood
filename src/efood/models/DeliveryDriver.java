@@ -1,12 +1,13 @@
 package efood.models;
 
+// Κλάση για τον Ντελιβερά
 public class DeliveryDriver extends User {
     
-    private String vehicleLicense;
+    private String vehicleLicense; // Πινακίδα
     private String imagePath; 
     private String cvPath; 
     
-    // katastasi egkrisis
+    // Κατάσταση έγκρισης από τον Admin
     public enum Status {
         PENDING, APPROVED, REJECTED
     }
@@ -17,7 +18,7 @@ public class DeliveryDriver extends User {
         this.vehicleLicense = vehicleLicense;
         this.imagePath = imagePath;
         this.cvPath = cvPath; 
-        this.approvalStatus = Status.PENDING; 
+        this.approvalStatus = Status.PENDING; // Πρέπει να τον εγκρίνει ο Admin
     }
 
     @Override
@@ -25,6 +26,7 @@ public class DeliveryDriver extends User {
         return "DRIVER";
     }
 
+    // Getters - Setters
     public String getVehicleLicense() { return vehicleLicense; }
     public void setVehicleLicense(String vehicleLicense) { this.vehicleLicense = vehicleLicense; }
 

@@ -2,12 +2,14 @@ package efood.models;
 
 import java.util.ArrayList;
 
+// Κλάση για τον Καταστηματάρχη
 public class StoreOwner extends User {
     
-    private String vatNumber;
+    private String vatNumber; // ΑΦΜ
     private String storeName;
     private ArrayList<String> managedStores;
 
+    // Κατάσταση έγκρισης από τον Admin
     public enum Status {
         PENDING, APPROVED, REJECTED
     }
@@ -18,7 +20,7 @@ public class StoreOwner extends User {
         this.vatNumber = vatNumber;
         this.storeName = storeName;
         this.managedStores = new ArrayList<>();
-        this.approvalStatus = Status.PENDING; 
+        this.approvalStatus = Status.PENDING; // Στην αρχή είναι σε αναμονή
     }
 
     @Override
