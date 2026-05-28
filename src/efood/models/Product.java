@@ -1,5 +1,6 @@
 package efood.models;
 
+// Abstract κλάση για τα προϊόντα
 public abstract class Product {
     protected String id;
     protected String title;
@@ -13,9 +14,10 @@ public abstract class Product {
         this.imagePath = imagePath;
     }
 
-    // polymorfiki methodos gia to calculation
+    // Πολυμορφική μέθοδος. Ο υπολογισμός γίνεται αλλιώς σε κάθε παιδί.
     public abstract double calculateFinalPrice();
 
+    // Getters και Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

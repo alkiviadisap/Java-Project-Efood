@@ -2,57 +2,37 @@ package efood.models;
 
 import java.util.ArrayList;
 
+// Κληρονομεί από το Product
 public class FoodItem extends Product {
     
-    // extra pedia gia fagita
-    private ArrayList<String> ingredients; // ta ulika (p.x. tomata, tyri)
+    private ArrayList<String> ingredients; 
     private boolean isVegan;
     private double discount;
 
-    // constructor
     public FoodItem(String id, String title, double basePrice, String imagePath, boolean isVegan, double discount) {
-        super(id, title, basePrice, imagePath); // stelnoume ta vasika stin mana
+        super(id, title, basePrice, imagePath); 
         this.isVegan = isVegan;
         this.discount = discount;
-        this.ingredients = new ArrayList<>(); // arxikopoioume ti lista gia na min exoume null pointer
+        this.ingredients = new ArrayList<>(); 
     }
 
-    // upervasi tis methodou gia ton teliko upologismo tis timis
+    // Overriding τη μέθοδο του Product
     @Override
     public double calculateFinalPrice() {
-        // apli praxi: arxiki timi meion tin ekptwsi
         double finalPrice = basePrice - discount;
-        
-        // an gia kapoio logo vgei arnhtikh i timi (lathos), tin kanoume 0
+        // Ασφάλεια για να μην βγει αρνητική τιμή
         if (finalPrice < 0) {
             finalPrice = 0;
         }
         return finalPrice;
     }
 
-    // --- getters & setters ---
-    public ArrayList<String> getIngredients() {
-        return ingredients;
-    }
+    public ArrayList<String> getIngredients() { return ingredients; }
+    public void addIngredient(String ingredient) { this.ingredients.add(ingredient); }
 
-    // methodos gia na prosthetoume ulika sto piato
-    public void addIngredient(String ingredient) {
-        this.ingredients.add(ingredient);
-    }
+    public boolean isVegan() { return isVegan; }
+    public void setVegan(boolean vegan) { this.isVegan = vegan; }
 
-    public boolean isVegan() {
-        return isVegan;
-    }
-
-    public void setVegan(boolean vegan) {
-        isVegan = vegan;
-    }
-
-    public double getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(double discount) {
-        this.discount = discount;
-    }
+    public double getDiscount() { return discount; }
+    public void setDiscount(double discount) { this.discount = discount; }
 }
