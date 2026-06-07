@@ -55,7 +55,6 @@ public class DelivererRegistrationFrame extends JFrame {
         uploadImgBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         uploadImgBtn.setMaximumSize(new Dimension(500, 35));
         uploadImgBtn.addActionListener(e -> {
-            // ανοίγει παράθυρο επιλογής αρχείου και αν διαλέξει κάτι, κρατάμε το αρχείο στη μεταβλητή
             JFileChooser fc = new JFileChooser();
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 selectedLicenseImage = fc.getSelectedFile();
@@ -70,7 +69,6 @@ public class DelivererRegistrationFrame extends JFrame {
         uploadCvBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         uploadCvBtn.setMaximumSize(new Dimension(500, 35));
         uploadCvBtn.addActionListener(e -> {
-            // το ίδιο και εδώ για το PDF του βιογραφικού
             JFileChooser fc = new JFileChooser();
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 selectedCV = fc.getSelectedFile();
@@ -84,7 +82,6 @@ public class DelivererRegistrationFrame extends JFrame {
         JPanel captchaWrapper = new JPanel(new GridLayout(1, 2, 10, 0));
         captchaWrapper.setMaximumSize(new Dimension(500, 40));
         captchaWrapper.setOpaque(false);
-        // τραβάμε ένα τυχαίο string για το captcha
         currentCaptcha = generateCaptcha(); 
         captchaBox = new JLabel(currentCaptcha, SwingConstants.CENTER);
         captchaBox.setOpaque(true);
@@ -106,9 +103,9 @@ public class DelivererRegistrationFrame extends JFrame {
         submitBtn.addActionListener(e -> {
             String name = nameField.getText().trim();
             String email = emailField.getText().trim();
-            String pass = new String(((JPasswordField)passField).getPassword()).replace(",", "");
+            String pass = new String(((JPasswordField)passField).getPassword());
             String phone = phoneField.getText().trim();
-            String address = addressField.getText().trim().replace(",", " ");
+            String address = addressField.getText().trim();
             String license = licenseField.getText().trim();
             String userCaptcha = captchaInput.getText().trim();
 
@@ -132,7 +129,6 @@ public class DelivererRegistrationFrame extends JFrame {
                 return;
             }
 
-            // τσεκάρουμε αν όντως πάτησε τα κουμπιά και διάλεξε αρχεία
             if (selectedLicenseImage == null) {
                 JOptionPane.showMessageDialog(null, "Ανεβάστε φωτογραφία διπλώματος!"); return;
             }
@@ -140,16 +136,13 @@ public class DelivererRegistrationFrame extends JFrame {
                 JOptionPane.showMessageDialog(null, "Ανεβάστε το Βιογραφικό σας (CV)!"); return;
             }
             
-            // συγκρίνουμε το input με το captcha βγάζοντας τα κενά που είχαμε βάλει για ομορφιά, και αγνοούμε κεφαλαία/μικρά
             if (!userCaptcha.equalsIgnoreCase(currentCaptcha.replace(" ", ""))) {
                 JOptionPane.showMessageDialog(null, "Λάθος κωδικός CAPTCHA.");
-                // αν κάνει λάθος, του βγάζουμε καινούριο για έξτρα ασφάλεια
                 currentCaptcha = generateCaptcha(); 
                 captchaBox.setText(currentCaptcha);
                 captchaInput.setText(""); return;
             }
 
-            // παίρνουμε τα full paths από τα αρχεία που διάλεξε για να τα σώσουμε στο αντικείμενο
             String imagePath = selectedLicenseImage.getAbsolutePath();
             String cvPath = selectedCV.getAbsolutePath();
             
@@ -164,7 +157,7 @@ public class DelivererRegistrationFrame extends JFrame {
             }
         });
 
-        JButton backBtn = new JButton("Επιστροφή");
+        JButton backBtn = new JButton("Ακύρωση");
         backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         backBtn.addActionListener(e -> { dispose(); new LoginFrame().setVisible(true); });
         mainPanel.add(backBtn);
@@ -183,7 +176,6 @@ public class DelivererRegistrationFrame extends JFrame {
     }
 
     private String generateCaptcha() {
-        // αφήσαμε έξω το O, το 0, το I και το 1 για να μη μπερδεύεται ο χρήστης όταν τα βλέπει
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
         StringBuilder sb = new StringBuilder();
         Random rnd = new Random();

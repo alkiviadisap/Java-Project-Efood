@@ -28,7 +28,6 @@ public class LoginFrame extends JFrame {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(new Color(245, 245, 245));
-        // βάζουμε μεγάλα περιθώρια δεξιά-αριστερά για να μην απλώνουν τα πεδία σε όλο το παράθυρο
         mainPanel.setBorder(new EmptyBorder(40, 250, 40, 250));
 
         JLabel headerLabel = new JLabel("Καλωσήρθατε στο eFood");
@@ -75,7 +74,6 @@ public class LoginFrame extends JFrame {
         registerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         registerBtn.addActionListener(e -> {
-            // ανάλογα τι διάλεξε στο dropdown, του ανοίγει την αντίστοιχη φόρμα εγγραφής
             String selected = (String) roleCombo.getSelectedItem();
             dispose();
             if (selected.equals("Πελάτης")) new CustomerRegistrationFrame().setVisible(true);
@@ -103,7 +101,6 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        // φορτώνουμε όλους τους χρήστες στο HashMap για να ψάξουμε αν υπάρχει το email
         HashMap<String, User> allUsers = DatabaseManager.loadUsers();
 
         if (allUsers.containsKey(email)) {
@@ -112,7 +109,6 @@ public class LoginFrame extends JFrame {
                 EfoodApp.saveSession(email); 
                 dispose();
                 
-                // downcasting: βλέπουμε τι ρόλο έχει ο χρήστης για να του ανοίξουμε το σωστό παράθυρο
                 if (user instanceof Customer) new MainDashboardFrame((Customer) user).setVisible(true);
                 else if (user instanceof StoreOwner) new StoreManagementFrame((StoreOwner) user).setVisible(true);
                 else if (user instanceof DeliveryDriver) new DelivererDashboardFrame((DeliveryDriver) user).setVisible(true);
@@ -124,7 +120,6 @@ public class LoginFrame extends JFrame {
         }
     }
 
-    // βοηθητική μέθοδος για να μη γράφουμε τα ίδια JLabel και JTextField ξανά και ξανά
     private void addLabeledInput(JPanel panel, String text, JTextField field) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.BOLD, 14));

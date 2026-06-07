@@ -28,7 +28,7 @@ public class StoreManagementFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // αν δεν τον έχει κάνει accept ο admin, του πετάμε μήνυμα και σταματάμε
+        // Έλεγχος αν είναι εγκεκριμένος ο ιδιοκτήτης από τον admin
         if (owner.getApprovalStatus() == StoreOwner.Status.PENDING) {
             showStatusMessage("Ο λογαριασμός σας εκκρεμεί έγκριση.<br>Θα μπορείτε να διαχειριστείτε το κατάστημα μόλις εγκριθείτε.", Color.ORANGE);
             return;
@@ -78,7 +78,6 @@ public class StoreManagementFrame extends JFrame {
         add(northPanel, BorderLayout.NORTH);
 
         String[] cols = {"Όνομα", "Τιμή (€)", "Vegan"};
-        // override για να μην μπορεί να κάνει edit κατευθείαν μέσα στα κελιά
         tableModel = new DefaultTableModel(null, cols) { @Override public boolean isCellEditable(int r, int c) { return false; } };
         productsTable = new JTable(tableModel);
         add(new JScrollPane(productsTable), BorderLayout.CENTER);
@@ -93,7 +92,6 @@ public class StoreManagementFrame extends JFrame {
 
         loadProducts();
 
-        // listener: όταν πατάει σε μια γραμμή, τα πεδία γεμίζουν αυτόματα για να τα κάνει edit
         productsTable.getSelectionModel().addListSelectionListener(e -> {
             int row = productsTable.getSelectedRow();
             if (row != -1) {
@@ -104,16 +102,13 @@ public class StoreManagementFrame extends JFrame {
         });
 
         smartSaveBtn.addActionListener(e -> {
-            // Αφαιρούμε τυχόν κόμματα από τον τίτλο για να μην καταστραφεί η δομή του CSV αρχείου
-            String title = titleField.getText().trim().replace(",", " ");
-            // αλλάζουμε το κόμμα σε τελεία για να μη σκάσει η Double.parseDouble
+            String title = titleField.getText().trim();
+            // Μετατροπή κόμματος σε τελεία
             String priceStr = priceField.getText().trim().replace(",", ".");
             if (title.isEmpty() || priceStr.isEmpty()) return;
             
             try {
                 double price = Double.parseDouble(priceStr);
-                
-                // βλέπουμε αν έχει επιλέξει γραμμή για να καταλάβουμε αν κάνει νέο ή update
                 int row = productsTable.getSelectedRow();
                 
                 if (row == -1) {
@@ -127,7 +122,6 @@ public class StoreManagementFrame extends JFrame {
                         }
                     }
                 } else {
-                    // κρατάμε το παλιό όνομα για να το βρει στη βάση (csv) και να το κάνει update
                     String oldTitle = tableModel.getValueAt(row, 0).toString();
                     if (DatabaseManager.updateProduct(currentOwner.getEmail(), oldTitle, title, price, veganCheck.isSelected())) {
                         JOptionPane.showMessageDialog(this, "Το προϊόν ενημερώθηκε επιτυχώς!");
@@ -146,7 +140,6 @@ public class StoreManagementFrame extends JFrame {
 
         deleteBtn.addActionListener(e -> {
             int row = productsTable.getSelectedRow();
-            // τσεκάρουμε αν πάτησε διαγραφή χωρίς να έχει επιλέξει κάτι
             if (row == -1) {
                 JOptionPane.showMessageDialog(this, "Επιλέξτε προϊόν προς διαγραφή από τον πίνακα!");
                 return;
@@ -186,7 +179,6 @@ public class StoreManagementFrame extends JFrame {
 
     private void loadProducts() {
         tableModel.setRowCount(0);
-        // διαβάζει τα products και δείχνει μόνο όσα έχουν το email αυτού του μαγαζιού
         try (Scanner sc = new Scanner(new File("data/products.csv"))) {
             while (sc.hasNextLine()) {
                 String[] p = sc.nextLine().split(",");

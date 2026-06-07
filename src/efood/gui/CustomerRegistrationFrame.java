@@ -30,7 +30,6 @@ public class CustomerRegistrationFrame extends JFrame {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(new Color(245, 245, 245));
-        // βάζουμε μεγάλα περιθώρια δεξιά-αριστερά για να μην απλώνουν τα πεδία
         mainPanel.setBorder(new EmptyBorder(40, 220, 20, 220));
 
         JLabel titleLabel = new JLabel("Δημιουργία Λογαριασμού");
@@ -71,23 +70,20 @@ public class CustomerRegistrationFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String name = nameField.getText().trim();
                 String email = emailField.getText().trim();
-                String pass = new String(passField.getPassword()).replace(",", "");
+                String pass = new String(passField.getPassword());
                 String phone = phoneField.getText().trim();
-                String address = addressField.getText().trim().replace(",", " ");
+                String address = addressField.getText().trim();
 
-                // τσεκάρουμε αν άφησε κάποιο πεδίο άδειο
                 if (name.isEmpty() || email.isEmpty() || pass.isEmpty() || phone.isEmpty() || address.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Συμπλήρωσε όλα τα πεδία!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
                     return; 
                 }
 
-                // regex για να δεχόμαστε μόνο γράμματα στο ονοματεπώνυμο
                 if (!name.matches("^[a-zA-Zα-ωΑ-ΩάέήίόύώςΆΈΉΊΌΎΏ\\s]+$")) {
                     JOptionPane.showMessageDialog(null, "Το ονοματεπώνυμο πρέπει να περιέχει μόνο γράμματα!", "Λάθος Όνομα", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // ελέγχουμε αν το email τελειώνει σε γνωστό provider για εγκυρότητα
                 if (!(email.endsWith("@gmail.com") || email.endsWith("@hotmail.com") || 
                       email.endsWith("@yahoo.gr") || email.endsWith("@outlook.com") || 
                       email.endsWith("@hmu.gr"))) {
@@ -95,7 +91,6 @@ public class CustomerRegistrationFrame extends JFrame {
                     return;
                 }
 
-                // το τηλέφωνο πρέπει να έχει ακριβώς 10 νούμερα
                 if (phone.length() != 10 || !phone.matches("\\d+")) {
                     JOptionPane.showMessageDialog(null, "Το τηλέφωνο πρέπει να έχει 10 ψηφία.", "Λάθος", JOptionPane.ERROR_MESSAGE);
                     return;
@@ -106,7 +101,6 @@ public class CustomerRegistrationFrame extends JFrame {
 
                 if (success) {
                     JOptionPane.showMessageDialog(null, "Επιτυχής εγγραφή!");
-                    // αν η εγγραφή πετύχει, τον κάνουμε κατευθείαν login (σώζουμε session) για να μην ξαναβάζει κωδικούς
                     EfoodApp.saveSession(email);
                     dispose(); 
                     new MainDashboardFrame(newCustomer).setVisible(true);
@@ -127,7 +121,6 @@ public class CustomerRegistrationFrame extends JFrame {
         add(registerBtn, BorderLayout.SOUTH);
     }
 
-    // βοηθητική μέθοδος για να φτιάχνει τα πεδία με το label τους όμορφα στοιχισμένα
     private JPanel createLargeFieldPanel(String labelText, JTextField textField) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));

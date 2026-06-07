@@ -31,7 +31,6 @@ public class StoreCatalogFrame extends JFrame {
         add(title, BorderLayout.NORTH);
 
         String[] cols = {"Προϊόν", "Τιμή (€)", "Vegan"};
-        // override για να μην μπορεί ο πελάτης να πειράξει τις τιμές στο κελί
         menuModel = new DefaultTableModel(null, cols) { 
             @Override public boolean isCellEditable(int r, int c) { return false; } 
         };
@@ -61,7 +60,6 @@ public class StoreCatalogFrame extends JFrame {
             String name = (String) menuModel.getValueAt(row, 0);
             String price = (String) menuModel.getValueAt(row, 1);
             
-            // βάζουμε και το όνομα του μαγαζιού για να ξέρουμε από πού είναι το προϊόν στο ταμείο
             myCart.add(new String[]{storeName + " - " + name, price});
             updateNextButton(); 
             JOptionPane.showMessageDialog(this, name + " προστέθηκε στο καλάθι!");
@@ -69,7 +67,6 @@ public class StoreCatalogFrame extends JFrame {
 
         nextBtn = new JButton();
         nextBtn.setBackground(new Color(150, 255, 150));
-        // αρχικοποιούμε το κουμπί με το τρέχον σύνολο του καλαθιού
         updateNextButton(); 
         
         nextBtn.addActionListener(e -> {
@@ -88,8 +85,8 @@ public class StoreCatalogFrame extends JFrame {
 
     private void updateNextButton() {
         double total = 0;
-        for (String[] item : myCart) total += Double.parseDouble(item[1].replace(",", "."));
-        nextBtn.setText("🛒 Ταμείο (" + myCart.size() + " | " + String.format(java.util.Locale.US, "%.2f", total) + "€) →");
+        for (String[] item : myCart) total += Double.parseDouble(item[1]);
+        nextBtn.setText("🛒 Ταμείο (" + myCart.size() + " | " + String.format("%.2f", total) + "€) →");
     }
 
     private void loadMenu(String email) {

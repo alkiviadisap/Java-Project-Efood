@@ -8,7 +8,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
-// Κλάση για την εγγραφή του καταστηματάρχη
 public class StoreOwnerRegistrationFrame extends JFrame {
 
     private JTextField nameField; 
@@ -65,13 +64,12 @@ public class StoreOwnerRegistrationFrame extends JFrame {
         submitBtn.addActionListener(e -> {
             String name = nameField.getText().trim();
             String email = emailField.getText().trim();
-            String pass = new String(passField.getPassword()).replace(",", "");
-            String address = addressField.getText().trim().replace(",", " ");
+            String pass = new String(passField.getPassword());
+            String address = addressField.getText().trim();
             String phone = phoneField.getText().trim();
             String vat = vatField.getText().trim();
-            String storeName = storeNameField.getText().trim().replace(",", " ");
+            String storeName = storeNameField.getText().trim();
 
-            // τσεκάρουμε αν άφησε κάποιο πεδίο άδειο
             if (name.isEmpty() || email.isEmpty() || pass.isEmpty() || phone.isEmpty() || address.isEmpty() || vat.isEmpty() || storeName.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Συμπληρώστε όλα τα πεδία!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
                 return; 
@@ -97,7 +95,6 @@ public class StoreOwnerRegistrationFrame extends JFrame {
                 return;
             }
 
-            // φτιάχνουμε το αντικείμενο και το σώζουμε στο αρχείο
             StoreOwner newOwner = new StoreOwner(name, email, pass, phone, address, vat, storeName);
 
             if (DatabaseManager.saveUser(newOwner)) {
@@ -112,8 +109,11 @@ public class StoreOwnerRegistrationFrame extends JFrame {
         mainPanel.add(submitBtn);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
-
         JButton backBtn = new JButton("Επιστροφή");
+        backBtn.setForeground(Color.BLUE);
+        backBtn.setBorderPainted(false);
+        backBtn.setContentAreaFilled(false);
+        backBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         backBtn.addActionListener(e -> {
             dispose();
@@ -124,7 +124,6 @@ public class StoreOwnerRegistrationFrame extends JFrame {
         add(mainPanel, BorderLayout.CENTER);
     }
 
-    // μέθοδος για να μη γράφουμε τα ίδια σε κάθε πεδίο (φτιάχνει label και textfield μαζί)
     private void addLabeledInput(JPanel panel, String text, JTextField field) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.BOLD, 13));

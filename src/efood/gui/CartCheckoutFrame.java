@@ -18,7 +18,7 @@ public class CartCheckoutFrame extends JFrame {
     private Customer currentCustomer;
     private ArrayList<String[]> myCart; 
     private double totalAmount = 0.0;
-    private double discountRate = 0.0;
+    private double discount = 0.0;
     private double loyaltyDiscount = 0.0; 
 
     private JLabel finalTotal;
@@ -48,11 +48,9 @@ public class CartCheckoutFrame extends JFrame {
         mainPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 
         String[] cols = {"Προϊόν", "Τιμή"};
-        // override για να μην μπορεί να γράψει μέσα στον πίνακα
         DefaultTableModel model = new DefaultTableModel(null, cols) { @Override public boolean isCellEditable(int r, int c) { return false; } };
         for (String[] item : cart) {
             model.addRow(new Object[]{item[0], item[1] + "€"});
-            // αλλάζουμε τυχόν κόμματα σε τελείες γιατί αλλιώς η parseDouble θα πετάξει Exception
             totalAmount += Double.parseDouble(item[1].replace(",", "."));
         }
         JTable table = new JTable(model);
@@ -63,7 +61,7 @@ public class CartCheckoutFrame extends JFrame {
         removeBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         removeBtn.setBackground(new Color(255, 100, 100));
         removeBtn.setForeground(Color.WHITE);
-        // Ενέργεια διαγραφής επιλεγμένου προϊόντος από το καλάθι
+        
         removeBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row == -1) {
@@ -71,20 +69,26 @@ public class CartCheckoutFrame extends JFrame {
                 return;
             }
             
-            // Αφαιρούμε απευθείας βάσει index για να αποφύγουμε bugs με προϊόντα που έχουν το ίδιο όνομα
-            totalAmount -= Double.parseDouble(myCart.get(row)[1].replace(",", ".")); 
-            if (totalAmount < 0.001) totalAmount = 0.0; // αποφυγή αρνητικού συνόλου λόγω double precision
+            String nameToRemove = (String) model.getValueAt(row, 0);
             
-            myCart.remove(row);
+            Iterator<String[]> it = myCart.iterator();
+            while (it.hasNext()) {
+                String[] item = it.next();
+                if (item[0].equals(nameToRemove)) {
+                    totalAmount -= Double.parseDouble(item[1].replace(",", ".")); 
+                    it.remove(); 
+                    break; 
+                }
+            }
             
             model.removeRow(row); 
             updateTotals(); 
         });
-        // υπολογισμος εκπτωσης με loyalty points και promo codes
+        
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         mainPanel.add(removeBtn);
 
-        finalTotal = new JLabel("Σύνολο: " + String.format(java.util.Locale.US, "%.2f", totalAmount) + "€");
+        finalTotal = new JLabel("Σύνολο: " + String.format("%.2f", totalAmount) + "€");
         finalTotal.setFont(new Font("Arial", Font.BOLD, 22));
         finalTotal.setAlignmentX(Component.CENTER_ALIGNMENT);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -100,7 +104,7 @@ public class CartCheckoutFrame extends JFrame {
                 if (currentCustomer.getLoyaltyPoints() > 0) {
                     loyaltyDiscount = currentCustomer.getLoyaltyPoints() * 0.01;
                     updateTotals();
-                    JOptionPane.showMessageDialog(this, "Κέρδισες " + String.format(java.util.Locale.US, "%.2f", loyaltyDiscount) + "€ έκπτωση από τους πόντους σου!");
+                    JOptionPane.showMessageDialog(this, "Κέρδισες " + String.format("%.2f", loyaltyDiscount) + "€ έκπτωση από τους πόντους σου!");
                 } else {
                     loyaltyCheck.setSelected(false);
                     JOptionPane.showMessageDialog(this, "Δεν έχεις αρκετούς πόντους Loyalty.");
@@ -129,9 +133,8 @@ public class CartCheckoutFrame extends JFrame {
                 if (usedPromoCodes.contains(code)) {
                     JOptionPane.showMessageDialog(this, "Έχεις ήδη χρησιμοποιήσει αυτόν τον κωδικό!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    // βάζουμε τον κωδικό στο HashSet για να θυμόμαστε ότι τον χρησιμοποίησε ήδη
                     usedPromoCodes.add(code); 
-                    discountRate = 0.20;
+                    discount = totalAmount * 0.20;
                     updateTotals(); 
                     JOptionPane.showMessageDialog(this, "Έκπτωση 20% εφαρμόστηκε!");
                 }
@@ -142,9 +145,8 @@ public class CartCheckoutFrame extends JFrame {
                 } else if (usedPromoCodes.contains(code)) {
                     JOptionPane.showMessageDialog(this, "Έχεις ήδη χρησιμοποιήσει αυτόν τον κωδικό!", "Προσοχή", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    // το ίδιο και εδώ για τον κωδικό της πινιάτας
                     usedPromoCodes.add(code); 
-                    discountRate = MainDashboardFrame.activePinataDiscount; 
+                    discount = totalAmount * MainDashboardFrame.activePinataDiscount; 
                     updateTotals(); 
                     JOptionPane.showMessageDialog(this, "Έκπτωση " + (int)(MainDashboardFrame.activePinataDiscount * 100) + "% εφαρμόστηκε!");
                 }
@@ -176,7 +178,7 @@ public class CartCheckoutFrame extends JFrame {
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         
-        finishBtn = new JButton("ΟΛΟΚΛΗΡΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ (" + String.format(java.util.Locale.US, "%.2f", totalAmount) + "€)");
+        finishBtn = new JButton("ΟΛΟΚΛΗΡΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ (" + String.format("%.2f", totalAmount) + "€)");
         finishBtn.setBackground(new Color(150, 255, 150));
         finishBtn.setFont(new Font("Arial", Font.BOLD, 18));
         finishBtn.setPreferredSize(new Dimension(0, 60));
@@ -191,28 +193,22 @@ public class CartCheckoutFrame extends JFrame {
             finishBtn.setText("Επεξεργασία πληρωμής... ⏳");
             finishBtn.setBackground(new Color(200, 200, 200));
 
-            // Φτιάχνουμε ένα νέο Thread (νήμα) για να βάλουμε ένα μικρό delay (sleep) 2 δευτερολέπτων
-            // Αυτό δίνει την αίσθηση ότι "φορτώνει" η τράπεζα, χωρίς όμως να παγώσει όλο το UI
             Thread paymentThread = new Thread(() -> {
                 try {
                     Thread.sleep(2000); 
                 } catch (InterruptedException ex) {}
 
-                // το invokeLater εξασφαλίζει ότι το UI θα ενημερωθεί σωστά αφού τελειώσει η δουλειά στο background thread
                 SwingUtilities.invokeLater(() -> {
-                    double discountAmount = totalAmount * discountRate;
-                    double finalPay = totalAmount - discountAmount - loyaltyDiscount;
-                    // έλεγχος για να μην βγει αρνητικό το σύνολο μετά τις εκπτώσεις
+                    double finalPay = totalAmount - discount - loyaltyDiscount;
                     if (finalPay < 0) finalPay = 0; 
                     
                     String orderId = "#" + (1000 + (int)(Math.random() * 9000));
-                    String details = "ID: " + orderId + "\nΣύνολο: " + String.format(java.util.Locale.US, "%.2f", finalPay) + "€\nΤρόπος: " + paymentCombo.getSelectedItem();
+                    String details = "ID: " + orderId + "\nΣύνολο: " + String.format("%.2f", finalPay) + "€\nΤρόπος: " + paymentCombo.getSelectedItem();
                     currentCustomer.getOrderHistory().add(details);
                     
                     if (loyaltyCheck.isSelected()) {
                         currentCustomer.setLoyaltyPoints(0); 
                     }
-                    // δίνουμε 10 πόντους ως επιβράβευση για τη νέα παραγγελία
                     currentCustomer.addPoints(10); 
                     
                     DatabaseManager.deleteUser(currentCustomer.getEmail());
@@ -221,9 +217,8 @@ public class CartCheckoutFrame extends JFrame {
                     String storeName = "Κατάστημα eFood";
                     if (!myCart.isEmpty()) storeName = myCart.get(0)[0].split(" - ")[0]; 
                     
-                    // υπολογίζουμε την αμοιβή του διανομέα (15% της παραγγελίας, με ελάχιστο τα 2 ευρώ)
                     double fee = totalAmount * 0.15; 
-                    String rewardStr = String.format(java.util.Locale.US, "%.2f", fee < 2.0 ? 2.0 : fee) + "€";
+                    String rewardStr = String.format("%.2f", fee < 2.0 ? 2.0 : fee) + "€";
                     
                     String deliveryAddress = currentCustomer.getAddress();
                     if (!currentCustomer.getSavedAddresses().isEmpty()) {
@@ -233,8 +228,7 @@ public class CartCheckoutFrame extends JFrame {
                         if (deliveryAddress.equals(currentCustomer.getAddress())) deliveryAddress = currentCustomer.getSavedAddresses().get(0).replace(" (Προεπιλογή)", "");
                     }
                     
-                    // Στέλνουμε και το τηλέφωνο του πελάτη στο DatabaseManager
-                    DatabaseManager.saveOrder(orderId, storeName, deliveryAddress, rewardStr, currentCustomer.getPhoneNumber());
+                    DatabaseManager.saveOrder(orderId, storeName, deliveryAddress, rewardStr);
                     
                     JOptionPane.showMessageDialog(CartCheckoutFrame.this, "Η πληρωμή εγκρίθηκε!\nΗ παραγγελία εστάλη επιτυχώς!\nΜπορείς να τη δεις στο 'Ενεργή Παραγγελία'.");
                     dispose();
@@ -261,16 +255,15 @@ public class CartCheckoutFrame extends JFrame {
     }
 
     private void updateTotals() {
-        double discountAmount = totalAmount * discountRate;
-        double finalPay = totalAmount - discountAmount - loyaltyDiscount;
+        double finalPay = totalAmount - discount - loyaltyDiscount;
         if (finalPay < 0) finalPay = 0.0; 
         
-        if (discountAmount > 0 || loyaltyDiscount > 0) {
-            finalTotal.setText("Σύνολο (Με έκπτωση): " + String.format(java.util.Locale.US, "%.2f", finalPay) + "€");
+        if (discount > 0 || loyaltyDiscount > 0) {
+            finalTotal.setText("Σύνολο (Με έκπτωση): " + String.format("%.2f", finalPay) + "€");
         } else {
-            finalTotal.setText("Σύνολο: " + String.format(java.util.Locale.US, "%.2f", finalPay) + "€");
+            finalTotal.setText("Σύνολο: " + String.format("%.2f", finalPay) + "€");
         }
         
-        finishBtn.setText("ΟΛΟΚΛΗΡΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ (" + String.format(java.util.Locale.US, "%.2f", finalPay) + "€)");
+        finishBtn.setText("ΟΛΟΚΛΗΡΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ (" + String.format("%.2f", finalPay) + "€)");
     }
 }
