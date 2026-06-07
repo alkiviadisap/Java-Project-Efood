@@ -24,7 +24,7 @@ public class DelivererDashboardFrame extends JFrame {
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 100));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         mainPanel.setBackground(new Color(248, 248, 248));
 
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -36,6 +36,7 @@ public class DelivererDashboardFrame extends JFrame {
         JLabel nameLabel = new JLabel("Διανομέας: " + currentDriver.getFullName());
         nameLabel.setFont(new Font("Arial", Font.BOLD, 15));
         
+        // ανάλογα το status του βγάζουμε και το αντίστοιχο κείμενο δίπλα στο όνομα
         String statusText;
         if (currentDriver.getApprovalStatus() == DeliveryDriver.Status.PENDING) statusText = "Σε αναμονή (Pending)";
         else if (currentDriver.getApprovalStatus() == DeliveryDriver.Status.REJECTED) statusText = "Απορρίφθηκε (Rejected)";
@@ -56,6 +57,7 @@ public class DelivererDashboardFrame extends JFrame {
         deleteBtn.setBackground(new Color(200, 0, 0));
         deleteBtn.setForeground(Color.WHITE);
         deleteBtn.addActionListener(e -> {
+            // βάζουμε ένα dialog επιβεβαίωσης για να μην σβήσει το λογαριασμό του κατά λάθος
             int result = JOptionPane.showConfirmDialog(this, "Είστε σίγουρος ότι θέλετε να διαγράψετε το λογαριασμό σας;", "Προσοχή", JOptionPane.YES_NO_OPTION);
             if(result == JOptionPane.YES_OPTION) {
                 if(DatabaseManager.deleteUser(currentDriver.getEmail())) {
@@ -107,7 +109,9 @@ public class DelivererDashboardFrame extends JFrame {
             mainPanel.add(tableTitle);
             mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-            String[] columnNames = {"ID", "Κατάστημα", "Διεύθυνση", "Αμοιβή"};
+            // Προσθέτουμε το Τηλέφωνο στις στήλες
+            String[] columnNames = {"ID", "Κατάστημα", "Διεύθυνση", "Αμοιβή", "Τηλέφωνο"};
+            // override για να μην μπορεί να κάνει διπλό κλικ και να αλλάξει τα δεδομένα στο κελί
             DefaultTableModel model = new DefaultTableModel(null, columnNames) {
                 @Override
                 public boolean isCellEditable(int row, int column) { return false; }
@@ -119,7 +123,7 @@ public class DelivererDashboardFrame extends JFrame {
             refreshBtn.addActionListener(e -> loadOrdersIntoTable(model));
 
             JScrollPane scrollPane = new JScrollPane(ordersTable);
-            scrollPane.setPreferredSize(new Dimension(750, 180)); 
+            scrollPane.setPreferredSize(new Dimension(850, 180)); 
             scrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
             mainPanel.add(scrollPane);
             
@@ -166,6 +170,7 @@ public class DelivererDashboardFrame extends JFrame {
             add(deliveredBtn, BorderLayout.SOUTH);
             
             acceptBtn.addActionListener(e -> {
+                // τσεκάρουμε αν έχει ήδη παραγγελία, δεν τον αφήνουμε να πάρει δεύτερη ταυτόχρονα
                 if(hasActiveOrder) {
                     JOptionPane.showMessageDialog(this, "Έχετε ήδη αναλάβει μια παραγγελία! Παραδώστε την πρώτα.");
                     return;
@@ -179,11 +184,13 @@ public class DelivererDashboardFrame extends JFrame {
                 String id = (String) model.getValueAt(row, 0);
                 String store = (String) model.getValueAt(row, 1);
                 String addr = (String) model.getValueAt(row, 2);
+                String phone = (String) model.getValueAt(row, 4); // Παίρνουμε το πραγματικό τηλέφωνο
                 
                 activeOrderId = id; 
                 pickupLbl.setText("📍 Παραλαβή: " + store + " (" + id + ")");
                 dropoffLbl.setText("🏠 Παράδοση: " + addr);
-                phoneLbl.setText("📞 Τηλέφωνο Πελάτη: 69" + (int)(Math.random()*100000000));
+                // Χρησιμοποιούμε πλέον το αληθινό τηλέφωνο
+                phoneLbl.setText("📞 Τηλέφωνο Πελάτη: " + phone);
                 
                 hasActiveOrder = true;
                 ordersTable.setEnabled(false); 
@@ -192,6 +199,7 @@ public class DelivererDashboardFrame extends JFrame {
             });
             
             deliveredBtn.addActionListener(e -> {
+                // μόλις την παραδώσει, ενημερώνεται το αρχείο, ελευθερώνεται ο διανομέας και μηδενίζει το UI
                 DatabaseManager.completeOrder(activeOrderId); 
                 loadOrdersIntoTable(model); 
                 

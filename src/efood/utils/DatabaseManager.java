@@ -4,6 +4,7 @@ import efood.models.*;
 import java.io.*;
 import java.util.*;
 
+// Η κλάση που διαχειρίζεται τα CSV αρχεία
 public class DatabaseManager {
     
     private static final String DATA_FOLDER = "data/";
@@ -11,17 +12,21 @@ public class DatabaseManager {
     private static final String PRODUCTS_FILE = DATA_FOLDER + "products.csv";
     private static final String ORDERS_FILE = DATA_FOLDER + "orders.csv"; 
 
+    // Φτιάχνει τον φάκελο data αν δεν υπάρχει
     static {
         File folder = new File("data");
         if (!folder.exists()) folder.mkdir();
     }
 
+    // Αποθηκεύει έναν νέο χρήστη
     public static boolean saveUser(User newUser) {
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(USERS_FILE, true))) {
             String line = "";
             if (newUser instanceof Customer) {
                 Customer c = (Customer) newUser;
                 String cardsStr = String.join(";", c.getSavedCards());
+                
+                // Κόλπο: Αλλάζουμε τα κόμματα σε κενά για να μην χαλάσει το CSV
                 String addrsStr = String.join("|", c.getSavedAddresses()).replace(",", " "); 
                 
                 String historyStr = "";
@@ -44,6 +49,7 @@ public class DatabaseManager {
         }
     }
 
+    // Διαβάζει όλους τους χρήστες από το αρχείο
     public static HashMap<String, User> loadUsers() {
         HashMap<String, User> usersMap = new HashMap<>();
         File file = new File(USERS_FILE);
@@ -62,17 +68,20 @@ public class DatabaseManager {
                     String[] loadedAddrs = addr.split("\\|");
                     Customer c = new Customer(name, email, pass, phone, loadedAddrs[0], Integer.parseInt(extra));
                     c.setSavedAddresses(new ArrayList<>(Arrays.asList(loadedAddrs)));
+                    
+                    // Φορτώνει κάρτες
                     if (p.length > 7 && !p[7].isEmpty()) {
                         String[] loadedCards = p[7].split(";");
                         c.setSavedCards(new ArrayList<>(Arrays.asList(loadedCards)));
                     }
+                    // Φορτώνει ιστορικό παραγγελιών
                     if (p.length > 8 && !p[8].isEmpty()) {
                         String[] loadedHistory = p[8].split("@@");
                         ArrayList<String> histList = new ArrayList<>();
                         for (String h : loadedHistory) {
                             histList.add(h.replace("##", "\n"));
                         }
-                        c.setOrderHistory(histList);
+                        c.setOrderHistory(histList); 
                     }
                     usersMap.put(email, c);
                 } else if (role.equals("OWNER")) {
@@ -136,6 +145,7 @@ public class DatabaseManager {
         } catch (Exception e) { return false; }
     }
 
+    // Ενημερώνει αν κάποιος εγκρίθηκε (status)
     public static boolean updateUserStatus(String email, String newStatus) {
         try {
             File file = new File(USERS_FILE);
@@ -159,6 +169,7 @@ public class DatabaseManager {
         } catch (Exception e) { return false; }
     }
 
+    // Διαγράφει έναν χρήστη
     public static boolean deleteUser(String email) {
         try {
             ArrayList<String> lines = new ArrayList<>();
@@ -179,6 +190,7 @@ public class DatabaseManager {
         } catch (Exception e) { return false; }
     }
 
+    // --- ΔΙΑΧΕΙΡΙΣΗ ΠΡΟΪΟΝΤΩΝ ---
     public static boolean saveProduct(String ownerEmail, String title, double price, boolean isVegan) {
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(PRODUCTS_FILE, true))) {
             writer.println(ownerEmail + "," + title + "," + price + "," + isVegan);
@@ -239,15 +251,17 @@ public class DatabaseManager {
     }
 
     // --- ΔΙΑΧΕΙΡΙΣΗ ΠΑΡΑΓΓΕΛΙΩΝ ---
-    public static boolean saveOrder(String id, String store, String address, String reward) {
+    public static boolean saveOrder(String id, String store, String address, String reward, String phone) {
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(ORDERS_FILE, true))) {
+            // Βγάζουμε τα κόμματα για ασφάλεια στο CSV
             String safeStore = store.replace(",", " ");
             String safeAddress = address.replace(",", " ");
-            writer.println(id + "," + safeStore + "," + safeAddress + "," + reward + ",PENDING");
+            writer.println(id + "," + safeStore + "," + safeAddress + "," + reward + "," + phone + ",PENDING");
             return true;
         } catch (Exception e) { return false; }
     }
 
+    // Τραβάει όσες παραγγελίες δεν έχουν παραδοθεί ακόμα (PENDING)
     public static ArrayList<String[]> loadPendingOrders() {
         ArrayList<String[]> orders = new ArrayList<>();
         File file = new File(ORDERS_FILE);
@@ -259,14 +273,15 @@ public class DatabaseManager {
                 String[] p = line.split(",");
                 
                 String status = p[p.length - 1]; 
-                if (status.equals("PENDING") && p.length >= 5) {
-                    orders.add(new String[]{p[0], p[1], p[2], p[3]});
+                if (status.equals("PENDING") && p.length >= 6) {
+                    orders.add(new String[]{p[0], p[1], p[2], p[3], p[4]});
                 }
             }
         } catch(Exception e) {}
         return orders;
     }
 
+    // Αλλάζει το status της παραγγελίας σε COMPLETED
     public static boolean completeOrder(String id) {
         File file = new File(ORDERS_FILE);
         if (!file.exists()) return false;
@@ -275,8 +290,8 @@ public class DatabaseManager {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 String[] p = line.split(",");
-                if (p.length >= 5 && p[0].equals(id)) {
-                    line = p[0] + "," + p[1] + "," + p[2] + "," + p[3] + ",COMPLETED";
+                if (p.length >= 6 && p[0].equals(id)) {
+                    line = p[0] + "," + p[1] + "," + p[2] + "," + p[3] + "," + p[4] + ",COMPLETED";
                 }
                 lines.add(line);
             }
@@ -287,7 +302,7 @@ public class DatabaseManager {
         } catch (Exception e) { return false; }
     }
 
-    // ΝΕΟ: Ελέγχει στο αρχείο αν η παραγγελία του πελάτη παραδόθηκε!
+    // Βλέπει το status για να ξέρει ο πελάτης πού βρίσκεται
     public static String getOrderStatus(String id) {
         File file = new File(ORDERS_FILE);
         if (!file.exists()) return "UNKNOWN";
@@ -296,7 +311,7 @@ public class DatabaseManager {
                 String line = sc.nextLine();
                 if (line.trim().isEmpty()) continue;
                 String[] p = line.split(",");
-                if (p.length >= 5 && p[0].equals(id)) {
+                if (p.length >= 6 && p[0].equals(id)) {
                     return p[p.length - 1]; 
                 }
             }

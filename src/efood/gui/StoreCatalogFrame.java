@@ -1,120 +1,106 @@
 package efood.gui;
 
+import efood.models.Customer;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.*;
+import java.util.ArrayList;
 
 public class StoreCatalogFrame extends JFrame {
 
-    public StoreCatalogFrame() {
-        // Ρυθμίσεις Παραθύρου - Laptop Layout
-        setTitle("Κατάλογος Καταστήματος");
-        setSize(1000, 800);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private Customer currentCustomer;
+    private ArrayList<String[]> myCart; 
+    private DefaultTableModel menuModel;
+    private JTable menuTable;
+    private JButton nextBtn;
+
+    public StoreCatalogFrame(Customer customer, String storeName, String storeEmail, ArrayList<String[]> cart) {
+        this.currentCustomer = customer;
+        this.myCart = cart; 
+        
+        setTitle("Κατάλογος: " + storeName);
+        setSize(900, 750);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Κύριο Panel με padding
-        JPanel mainPanel = new JPanel(new BorderLayout(20, 0));
-        mainPanel.setBackground(new Color(245, 245, 245));
-        mainPanel.setBorder(new EmptyBorder(20, 50, 20, 50));
+        JLabel title = new JLabel("Κατάστημα: " + storeName, SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 28));
+        title.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        add(title, BorderLayout.NORTH);
 
-        // --- Πάνω Μέρος: Τίτλος Καταστήματος ---
-        JLabel storeName = new JLabel("NAME OF STORE", SwingConstants.CENTER);
-        storeName.setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 28));
-        storeName.setBorder(new EmptyBorder(10, 0, 20, 0));
-        add(storeName, BorderLayout.NORTH);
-
-        // --- Αριστερό Panel: Λίστα Προϊόντων (Menu) ---
-        JPanel menuPanel = new JPanel(new BorderLayout());
-        menuPanel.setOpaque(false);
+        String[] cols = {"Προϊόν", "Τιμή (€)", "Vegan"};
+        // override για να μην μπορεί ο πελάτης να πειράξει τις τιμές στο κελί
+        menuModel = new DefaultTableModel(null, cols) { 
+            @Override public boolean isCellEditable(int r, int c) { return false; } 
+        };
+        menuTable = new JTable(menuModel);
+        menuTable.setRowHeight(35);
+        menuTable.setFont(new Font("Arial", Font.PLAIN, 14));
         
-        JPanel menuHeader = new JPanel(new BorderLayout());
-        menuHeader.setOpaque(false);
-        JButton backBtn = new JButton("Go Back");
-        backBtn.setBackground(new Color(230, 80, 80));
-        backBtn.setForeground(Color.WHITE);
+        loadMenu(storeEmail);
+        add(new JScrollPane(menuTable), BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
         
-        JButton addBtn = new JButton("Add to Basket");
-        addBtn.setBackground(new Color(255, 220, 220));
+        JButton backBtn = new JButton("← Πίσω στα Καταστήματα");
+        backBtn.setBackground(new Color(255, 180, 180));
+        backBtn.addActionListener(e -> { 
+            dispose(); 
+            new MainDashboardFrame(currentCustomer, myCart).setVisible(true); 
+        });
+
+        JButton addBtn = new JButton("➕ Προσθήκη στο Καλάθι");
+        addBtn.setBackground(new Color(150, 200, 255));
+        addBtn.addActionListener(e -> {
+            int row = menuTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Επίλεξε ένα προϊόν!"); return;
+            }
+            String name = (String) menuModel.getValueAt(row, 0);
+            String price = (String) menuModel.getValueAt(row, 1);
+            
+            // βάζουμε και το όνομα του μαγαζιού για να ξέρουμε από πού είναι το προϊόν στο ταμείο
+            myCart.add(new String[]{storeName + " - " + name, price});
+            updateNextButton(); 
+            JOptionPane.showMessageDialog(this, name + " προστέθηκε στο καλάθι!");
+        });
+
+        nextBtn = new JButton();
+        nextBtn.setBackground(new Color(150, 255, 150));
+        // αρχικοποιούμε το κουμπί με το τρέχον σύνολο του καλαθιού
+        updateNextButton(); 
         
-        menuHeader.add(backBtn, BorderLayout.WEST);
-        menuHeader.add(addBtn, BorderLayout.EAST);
-        menuHeader.setBorder(new EmptyBorder(0, 0, 10, 0));
+        nextBtn.addActionListener(e -> {
+            if (myCart.isEmpty()) { 
+                JOptionPane.showMessageDialog(this, "Το καλάθι είναι άδειο!"); return; 
+            }
+            dispose();
+            new CartCheckoutFrame(currentCustomer, myCart).setVisible(true);
+        });
 
-        JTextArea productList = new JTextArea("Item 1\nItem 2\nItem 3\nItem 4\nItem 5");
-        productList.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        productList.setBorder(new LineBorder(Color.BLACK, 2));
-        
-        menuPanel.add(menuHeader, BorderLayout.NORTH);
-        menuPanel.add(new JScrollPane(productList), BorderLayout.CENTER);
-
-        // --- Δεξί Panel: My Cart ---
-        JPanel cartPanel = new JPanel();
-        cartPanel.setLayout(new BoxLayout(cartPanel, BoxLayout.Y_AXIS));
-        cartPanel.setPreferredSize(new Dimension(350, 0));
-        cartPanel.setOpaque(false);
-
-        JLabel cartTitle = new JLabel("Το Καλάθι μου:");
-        cartTitle.setFont(new Font("Arial", Font.BOLD, 18));
-        cartTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        JPanel cartItemsBox = new JPanel();
-        cartItemsBox.setBackground(Color.WHITE);
-        cartItemsBox.setBorder(new LineBorder(Color.BLACK, 2));
-        cartItemsBox.setPreferredSize(new Dimension(300, 300));
-        cartItemsBox.setMaximumSize(new Dimension(300, 300));
-
-        // --- Loyalty Points Section (Προστέθηκε ο αριθμός των πόντων) ---
-        JPanel loyaltyPanel = new JPanel();
-        loyaltyPanel.setLayout(new BoxLayout(loyaltyPanel, BoxLayout.Y_AXIS));
-        loyaltyPanel.setOpaque(false);
-        loyaltyPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel currentPointsLabel = new JLabel("Your Points: 150"); // Εδώ φαίνονται οι πόντοι
-        currentPointsLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        currentPointsLabel.setForeground(new Color(120, 40, 180)); // Μοβ χρώμα για έμφαση
-        currentPointsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JCheckBox loyaltyCheck = new JCheckBox("Redeem loyalty points?");
-        loyaltyCheck.setFont(new Font("Arial", Font.PLAIN, 14));
-        loyaltyCheck.setOpaque(false);
-        loyaltyCheck.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        loyaltyPanel.add(currentPointsLabel);
-        loyaltyPanel.add(loyaltyCheck);
-        
-        JLabel totalLabel = new JLabel("Total Amount: 16.50€");
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        totalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        totalLabel.setBorder(new EmptyBorder(15, 0, 0, 0));
-
-        cartPanel.add(cartTitle);
-        cartPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        cartPanel.add(cartItemsBox);
-        cartPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        cartPanel.add(loyaltyPanel);
-        cartPanel.add(totalLabel);
-
-        // --- Layout Integration ---
-        mainPanel.add(menuPanel, BorderLayout.CENTER);
-        mainPanel.add(cartPanel, BorderLayout.EAST);
-
-        // --- Bottom Button: NEXT ---
-        JButton nextBtn = new JButton("NEXT TO CHECKOUT");
-        nextBtn.setBackground(new Color(150, 255, 150)); // Πράσινο
-        nextBtn.setFont(new Font("Arial", Font.BOLD, 20));
-        nextBtn.setPreferredSize(new Dimension(0, 70));
-        
-        add(mainPanel, BorderLayout.CENTER);
-        add(nextBtn, BorderLayout.SOUTH);
+        bottomPanel.add(backBtn);
+        bottomPanel.add(addBtn);
+        bottomPanel.add(nextBtn);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); } 
-        catch (Exception e) {}
-        SwingUtilities.invokeLater(() -> new StoreCatalogFrame().setVisible(true));
+    private void updateNextButton() {
+        double total = 0;
+        for (String[] item : myCart) total += Double.parseDouble(item[1].replace(",", "."));
+        nextBtn.setText("🛒 Ταμείο (" + myCart.size() + " | " + String.format(java.util.Locale.US, "%.2f", total) + "€) →");
+    }
+
+    private void loadMenu(String email) {
+        try (BufferedReader br = new BufferedReader(new FileReader("data/products.csv"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] p = line.split(",");
+                if (p.length >= 4 && p[0].equals(email)) {
+                    menuModel.addRow(new Object[]{p[1], p[2], p[3].equals("true") ? "🌱 Ναι" : "Όχι"});
+                }
+            }
+        } catch (Exception e) {}
     }
 }

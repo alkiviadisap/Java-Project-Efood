@@ -1,2 +1,0 @@
-CartCheckoutFrame
-CartCheckoutFrame$1
