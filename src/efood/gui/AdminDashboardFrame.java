@@ -38,10 +38,12 @@ public class AdminDashboardFrame extends JFrame {
         String[] filters = {
             "Εκκρεμείς Αιτήσεις (Διανομείς & Καταστήματα)", 
             "Εγκεκριμένα Καταστήματα", 
+            "Εγκεκριμένοι Διανομείς",
             "Ιστορικό Όλων των Χρηστών"
         };
         filterCombo = new JComboBox<>(filters);
         filterCombo.setFont(new Font("Arial", Font.PLAIN, 14));
+        // κάθε φορά που αλλάζει το φίλτρο στο dropdown, ξαναφορτώνουμε τα δεδομένα στον πίνακα
         filterCombo.addActionListener(e -> loadData()); 
         
         filterPanel.add(filterCombo);
@@ -49,6 +51,7 @@ public class AdminDashboardFrame extends JFrame {
         add(topPanel, BorderLayout.NORTH);
 
         String[] cols = {"Ονοματεπώνυμο", "Email", "Τηλέφωνο", "Πληροφορίες", "Κατάσταση"};
+        // override για να μην πειράζει ο admin τα στοιχεία κατευθείαν με διπλό κλικ στον πίνακα
         model = new DefaultTableModel(null, cols) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -102,6 +105,7 @@ public class AdminDashboardFrame extends JFrame {
         HashMap<String, User> users = DatabaseManager.loadUsers();
         int selection = filterCombo.getSelectedIndex();
 
+        // περνάμε όλους τους χρήστες και με το instanceof ελέγχουμε τι τύπου είναι για να τους φιλτράρουμε σωστά
         for (User u : users.values()) {
             if (selection == 0) { 
                 if (u instanceof DeliveryDriver && ((DeliveryDriver) u).getApprovalStatus() == DeliveryDriver.Status.PENDING) {
@@ -114,6 +118,10 @@ public class AdminDashboardFrame extends JFrame {
                     addOwnerToTable((StoreOwner) u);
                 }
             } else if (selection == 2) { 
+                if (u instanceof DeliveryDriver && ((DeliveryDriver) u).getApprovalStatus() == DeliveryDriver.Status.APPROVED) {
+                    addDriverToTable((DeliveryDriver) u);
+                }
+            } else if (selection == 3) { 
                 if (u instanceof DeliveryDriver) addDriverToTable((DeliveryDriver) u);
                 else if (u instanceof StoreOwner) addOwnerToTable((StoreOwner) u);
                 else if (u instanceof Customer) {
@@ -158,6 +166,7 @@ public class AdminDashboardFrame extends JFrame {
         }
         try {
             BufferedImage img = ImageIO.read(imgFile);
+            // κάνουμε scale την εικόνα (σμίκρυνση) για να χωράει όμορφα στο popup, αλλιώς μια τεράστια φώτο θα έπιανε όλη την οθόνη
             double scale = Math.min(600.0 / img.getWidth(), 500.0 / img.getHeight());
             Image scaled = img.getScaledInstance((int)(img.getWidth()*scale), (int)(img.getHeight()*scale), Image.SCALE_SMOOTH);
             JOptionPane.showMessageDialog(this, new JLabel(new ImageIcon(scaled)), "Προβολή Διπλώματος", JOptionPane.PLAIN_MESSAGE);
@@ -185,6 +194,7 @@ public class AdminDashboardFrame extends JFrame {
         try {
             File pdf = new File(path);
             if (pdf.exists()) {
+                // ανοίγει το PDF κατευθείαν με το default πρόγραμμα του υπολογιστή (π.χ. Acrobat Reader)
                 Desktop.getDesktop().open(pdf);
             } else {
                 JOptionPane.showMessageDialog(this, "Το αρχείο PDF δεν βρέθηκε.");
@@ -198,6 +208,7 @@ public class AdminDashboardFrame extends JFrame {
         User u = getSelectedUser();
         if (u == null) return;
 
+        // οι πελάτες δεν χρειάζονται έγκριση, οπότε δεν αφήνουμε τον admin να τους αλλάξει status
         if (u instanceof Customer) {
             JOptionPane.showMessageDialog(this, "Οι πελάτες δεν χρειάζονται έγκριση.");
             return;
@@ -217,6 +228,7 @@ public class AdminDashboardFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Επιλέξτε έναν χρήστη.");
             return null;
         }
+        // παίρνουμε το email από τη στήλη 1 (αφού εκεί το βάλαμε στον πίνακα) για να βρούμε τον χρήστη στο HashMap
         String email = (String) model.getValueAt(row, 1);
         return DatabaseManager.loadUsers().get(email);
     }

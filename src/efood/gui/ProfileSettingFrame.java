@@ -64,15 +64,17 @@ public class ProfileSettingFrame extends JFrame {
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
         addAddrBtn.addActionListener(e -> {
+            // ανοίγει ένα input dialog για να γράψει τη νέα διεύθυνση
             String newAddr = JOptionPane.showInputDialog(this, "Προσθήκη Νέας Διεύθυνσης:");
             if (newAddr != null && !newAddr.trim().isEmpty()) {
-                addrCombo.addItem(newAddr.trim());
+                addrCombo.addItem(newAddr.trim().replace(",", " "));
                 addrCombo.setSelectedIndex(addrCombo.getItemCount() - 1);
             }
         });
         
         removeAddrBtn.addActionListener(e -> {
             int selectedIdx = addrCombo.getSelectedIndex();
+            // έλεγχος για να μην σβήσει την τελευταία διεύθυνση που έχει μείνει
             if (selectedIdx != -1 && addrCombo.getItemCount() > 1) { 
                 addrCombo.removeItemAt(selectedIdx);
             } else if (addrCombo.getItemCount() <= 1) {
@@ -83,6 +85,7 @@ public class ProfileSettingFrame extends JFrame {
         setDefaultAddrBtn.addActionListener(e -> {
             int selectedIdx = addrCombo.getSelectedIndex();
             if (selectedIdx != -1) {
+                // ψάχνει να βρει την παλιά προεπιλογή, της αφαιρεί το tag, και το βάζει στη νέα
                 String currentText = addrCombo.getItemAt(selectedIdx);
                 if (!currentText.contains("(Προεπιλογή)")) {
                     for (int i = 0; i < addrCombo.getItemCount(); i++) {
@@ -124,6 +127,7 @@ public class ProfileSettingFrame extends JFrame {
         mainPanel.add(cardButtonsPanel);
 
         addCardBtn.addActionListener(e -> {
+            // φτιάχνει ένα custom dialog με πολλά πεδία για τα στοιχεία της κάρτας
             JTextField cardNumField = new JTextField();
             JTextField expField = new JTextField();
             JTextField cvvField = new JTextField();
@@ -136,6 +140,7 @@ public class ProfileSettingFrame extends JFrame {
             if (option == JOptionPane.OK_OPTION) {
                 String cardNum = cardNumField.getText().trim();
                 String cvv = cvvField.getText().trim();
+                // απλός έλεγχος για το αν έβαλε νούμερα και δεν είναι άδειο
                 if (cardNum.length() >= 4 && !cvv.isEmpty() && cardNum.matches("\\d+")) {
                     if (cardsCombo.getItemAt(0).equals("Καμία αποθηκευμένη κάρτα.")) {
                         cardsCombo.removeAllItems();
@@ -162,6 +167,7 @@ public class ProfileSettingFrame extends JFrame {
         setDefaultCardBtn.addActionListener(e -> {
             int selectedIdx = cardsCombo.getSelectedIndex();
             if (selectedIdx != -1 && !cardsCombo.getItemAt(0).equals("Καμία αποθηκευμένη κάρτα.")) {
+                // ίδια λογική με τις διευθύνσεις, αλλάζει το tag (Προεπιλογή)
                 String currentText = cardsCombo.getItemAt(selectedIdx);
                 if (!currentText.contains("(Προεπιλογή)")) {
                     for (int i = 0; i < cardsCombo.getItemCount(); i++) {
@@ -190,6 +196,7 @@ public class ProfileSettingFrame extends JFrame {
 
         JButton saveBtn = createLargeButton("Αποθήκευση", new Color(150, 255, 150), Color.BLACK);
         saveBtn.addActionListener(e -> {
+            // μαζεύει όλα τα items από τα combobox (κάρτες, διευθύνσεις) και τα σώζει
             ArrayList<String> newCards = new ArrayList<>();
             if (!cardsCombo.getItemAt(0).equals("Καμία αποθηκευμένη κάρτα.")) {
                 for (int i = 0; i < cardsCombo.getItemCount(); i++) {
@@ -261,6 +268,7 @@ public class ProfileSettingFrame extends JFrame {
         panel.add(Box.createRigidArea(new Dimension(0, 8)));
     }
 
+    // κοινό στυλ για τα components για να μην το γράφω παντού
     private void styleComponent(JComponent c) {
         c.setMaximumSize(new Dimension(500, 40));
         c.setPreferredSize(new Dimension(500, 40));

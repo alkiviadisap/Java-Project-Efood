@@ -98,6 +98,7 @@ public class MainDashboardFrame extends JFrame {
         add(topPanel, BorderLayout.NORTH);
 
         String[] storeCols = {"Όνομα Καταστήματος", "Email"};
+        // override για να κλειδώσουμε τα κελιά του πίνακα, να μην μπορεί ο χρήστης να γράψει μέσα
         storesModel = new DefaultTableModel(null, storeCols) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -127,9 +128,9 @@ public class MainDashboardFrame extends JFrame {
         });
 
         double total = 0;
-        for (String[] item : myCart) total += Double.parseDouble(item[1]);
+        for (String[] item : myCart) total += Double.parseDouble(item[1].replace(",", "."));
         
-        JButton cartBtn = new JButton("🛒 Καλάθι (" + myCart.size() + " | " + String.format("%.2f", total) + "€)");
+        JButton cartBtn = new JButton("🛒 Καλάθι (" + myCart.size() + " | " + String.format(java.util.Locale.US, "%.2f", total) + "€)");
         cartBtn.setBackground(new Color(100, 200, 100));
         cartBtn.addActionListener(e -> {
             if (myCart.isEmpty()) {
@@ -190,6 +191,7 @@ public class MainDashboardFrame extends JFrame {
     private void loadStores() {
         HashMap<String, User> users = DatabaseManager.loadUsers();
         for (User u : users.values()) {
+            // φέρνει μόνο τα μαγαζιά που έχουν πάρει έγκριση (APPROVED) από τον admin
             if (u instanceof StoreOwner && ((StoreOwner) u).getApprovalStatus() == StoreOwner.Status.APPROVED) {
                 storesModel.addRow(new Object[]{((StoreOwner) u).getStoreName(), u.getEmail()});
             }
@@ -265,6 +267,7 @@ public class MainDashboardFrame extends JFrame {
         dialog.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // όταν κλείσει το παραθυράκι, η πινιάτα ξεκινάει πάλι να κουνιέται από εκεί που σταμάτησε
                 pinataTimer.start(); 
             }
         });

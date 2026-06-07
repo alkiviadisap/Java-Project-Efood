@@ -74,14 +74,14 @@ public class DatabaseManager {
                         String[] loadedCards = p[7].split(";");
                         c.setSavedCards(new ArrayList<>(Arrays.asList(loadedCards)));
                     }
-                    // Φορτώνει ιστορικό
+                    // Φορτώνει ιστορικό παραγγελιών
                     if (p.length > 8 && !p[8].isEmpty()) {
                         String[] loadedHistory = p[8].split("@@");
                         ArrayList<String> histList = new ArrayList<>();
                         for (String h : loadedHistory) {
                             histList.add(h.replace("##", "\n"));
                         }
-                        c.setOrderHistory(histList);
+                        c.setOrderHistory(histList); 
                     }
                     usersMap.put(email, c);
                 } else if (role.equals("OWNER")) {
@@ -251,12 +251,12 @@ public class DatabaseManager {
     }
 
     // --- ΔΙΑΧΕΙΡΙΣΗ ΠΑΡΑΓΓΕΛΙΩΝ ---
-    public static boolean saveOrder(String id, String store, String address, String reward) {
+    public static boolean saveOrder(String id, String store, String address, String reward, String phone) {
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(ORDERS_FILE, true))) {
             // Βγάζουμε τα κόμματα για ασφάλεια στο CSV
             String safeStore = store.replace(",", " ");
             String safeAddress = address.replace(",", " ");
-            writer.println(id + "," + safeStore + "," + safeAddress + "," + reward + ",PENDING");
+            writer.println(id + "," + safeStore + "," + safeAddress + "," + reward + "," + phone + ",PENDING");
             return true;
         } catch (Exception e) { return false; }
     }
@@ -273,8 +273,8 @@ public class DatabaseManager {
                 String[] p = line.split(",");
                 
                 String status = p[p.length - 1]; 
-                if (status.equals("PENDING") && p.length >= 5) {
-                    orders.add(new String[]{p[0], p[1], p[2], p[3]});
+                if (status.equals("PENDING") && p.length >= 6) {
+                    orders.add(new String[]{p[0], p[1], p[2], p[3], p[4]});
                 }
             }
         } catch(Exception e) {}
@@ -290,8 +290,8 @@ public class DatabaseManager {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 String[] p = line.split(",");
-                if (p.length >= 5 && p[0].equals(id)) {
-                    line = p[0] + "," + p[1] + "," + p[2] + "," + p[3] + ",COMPLETED";
+                if (p.length >= 6 && p[0].equals(id)) {
+                    line = p[0] + "," + p[1] + "," + p[2] + "," + p[3] + "," + p[4] + ",COMPLETED";
                 }
                 lines.add(line);
             }
@@ -311,7 +311,7 @@ public class DatabaseManager {
                 String line = sc.nextLine();
                 if (line.trim().isEmpty()) continue;
                 String[] p = line.split(",");
-                if (p.length >= 5 && p[0].equals(id)) {
+                if (p.length >= 6 && p[0].equals(id)) {
                     return p[p.length - 1]; 
                 }
             }
